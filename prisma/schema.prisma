@@ -1,0 +1,179 @@
+// Credit Card Benefits Optimizer Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String   @id @default(cuid())
+  timezone             String   @default("America/New_York")
+  defaultReminderDays  Int      @default(7)
+
+  // Value per point assumptions (JSON)
+  // e.g., { "UR": 0.015, "MR": 0.016, "VENTURE": 0.012, "TY": 0.013 }
+  valuePerPointRules   String   @default("{\"UR\": 0.015, \"MR\": 0.016, \"VENTURE\": 0.012, \"TY\": 0.013}")
+
+  cards                Card[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+enum Issuer {
+  CHASE
+  AMEX
+  CITI
+  CAPITAL_ONE
+  CUSTOM
+}
+
+enum Network {
+  VISA
+  MASTERCARD
+  AMEX
+  DISCOVER
+}
+
+model Card {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  issuer            Issuer
+  productName       String    // "Chase Sapphire Reserve"
+  network           Network
+  annualFee         Float
+
+  openDate          String?   // ISO date string
+  renewalMonthDay   String?   // "MM-DD" for cardmember year
+
+  notes             String?
+  active            Boolean   @default(true)
+
+  benefits          Benefit[]
+  welcomeBonuses    WelcomeBonus[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+enum BenefitType {
+  RECURRING_CREDIT
+  WELCOME_BONUS
+  MULTIPLIER
+  LOUNGE
+  INSURANCE
+  OTHER
+}
+
+enum CycleType {
+  CALENDAR_YEAR
+  CARDMEMBER_YEAR
+  MONTHLY
+  SEMIANNUAL_CALENDAR
+  ONE_TIME
+  PER_TRIP
+}
+
+model Benefit {
+  id                  String       @id @default(cuid())
+  cardId              String
+  card                Card         @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  name                String
+  type                BenefitType
+
+  // Value
+  nominalValue        Float?       // null for insurance/lounge
+  currency            String       // "USD", "POINTS", "MILES"
+  program             String?      // "UR", "MR", "VENTURE", "TY"
+
+  // Cycle rules
+  cycleType           CycleType
+  cycleDefinition     String       // JSON string: For complex cycles like CSR dining (two windows)
+  usageLimitPerCycle  Float?
+
+  // Usage instructions
+  triggerDescription  String       // "Dine at Sapphire Reserve Exclusive Tables partners"
+  exclusionsSummary   String?
+
+  // Metadata
+  priorityScore       Int          @default(50) // 0-100
+  officialUrl         String?
+  active              Boolean      @default(true)
+
+  usage               BenefitUsage[]
+  reminders           ReminderSettings[]
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+}
+
+model BenefitUsage {
+  id          String   @id @default(cuid())
+  benefitId   String
+  benefit     Benefit  @relation(fields: [benefitId], references: [id], onDelete: Cascade)
+
+  dateUsed    String   // ISO date string
+  amountUsed  Float
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WelcomeBonus {
+  id                String    @id @default(cuid())
+  cardId            String
+  card              Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  requiredSpend     Float
+  spendWindowStart  String    // ISO date string
+  spendWindowEnd    String    // ISO date string
+
+  earned            Boolean   @default(false)
+  earnedDate        String?   // ISO date string
+
+  expectedPoints    Int
+  actualPoints      Int?
+  program           String    // "UR", "MR", etc.
+
+  currentSpend      Float     @default(0) // Manually tracked
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+enum ReminderChannel {
+  IN_APP
+  EMAIL_PLACEHOLDER
+}
+
+model ReminderSettings {
+  id          String           @id @default(cuid())
+  benefitId   String?          // null = global default
+  benefit     Benefit?         @relation(fields: [benefitId], references: [id], onDelete: Cascade)
+
+  daysBefore  Int
+  channel     ReminderChannel
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model PlanRecommendation {
+  id          String   @id @default(cuid())
+  month       Int      // 1-12
+  year        Int
+
+  cardId      String
+  category    String   // "DINING", "GROCERY", "TRAVEL", etc.
+  rationale   String
+  priority    Int      // 1-3
+
+  createdAt   DateTime @default(now())
+}
