@@ -4,7 +4,7 @@ A production-quality personal web app that helps you extract maximum value from 
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8)
 ![Prisma](https://img.shields.io/badge/Prisma-6-2d3748)
 
 ## ✨ Features
@@ -30,11 +30,24 @@ A production-quality personal web app that helps you extract maximum value from 
   - Monthly use-it-or-lose-it reminders
 - Clear, plain-English instructions for using each benefit
 
+### Visual Calendar
+- **Month view calendar** showing all benefit events
+- Color-coded events (expiring credits, resets, deadlines, anniversaries)
+- Next 30 days timeline with countdown
+- Easy navigation between months
+
+### Comprehensive Settings
+- **User preferences**: Timezone, reminder thresholds, value-per-point assumptions
+- **Card management**: Edit open dates, renewal dates
+- **Welcome bonus tracking**: Update current spend and deadlines
+- All settings persist and affect benefit calculations in real-time
+
 ### Polished UI
 - Framer-quality design with Tailwind CSS
-- Responsive layouts for desktop and mobile
+- Fully responsive (desktop, tablet, mobile)
 - Smooth transitions and hover states
-- Intuitive navigation and information hierarchy
+- Intuitive navigation with mobile menu
+- Consistent design system throughout
 
 ## 🚀 Quick Start
 
@@ -120,8 +133,8 @@ src/
 │   ├── page.tsx             # Dashboard
 │   ├── cards/               # Card management
 │   ├── action-center/       # Prioritized actions
-│   ├── calendar/            # Calendar view (placeholder)
-│   └── settings/            # User preferences (placeholder)
+│   ├── calendar/            # Visual calendar with events
+│   └── settings/            # User preferences & card management
 ├── components/              # React components
 │   ├── ui/                  # Design system primitives
 │   └── layout/              # Navigation, headers
@@ -148,43 +161,32 @@ prisma/
 
 ## 🔧 Customization
 
-### Update Your Card Open Dates
-Edit `prisma/seed.ts` and update the `openDate` fields to match when you opened each card:
+All customization is now done through the **Settings page** (no code editing required!):
 
-```typescript
-openDate: '2025-01-15', // Change to your actual date
-```
+### Using the Settings Page
 
-### Adjust Welcome Bonus Terms
-If your CSR offer differs from 125k/$6k/3mo, update the welcome bonus in `prisma/seed.ts`:
+1. **Navigate to Settings** from the main navigation
+2. **User Preferences Section:**
+   - Choose your timezone (affects expiry calculations)
+   - Set default reminder lead time (3, 7, 14, or 30 days)
+   - Adjust points value assumptions based on your redemption strategy:
+     - Chase Ultimate Rewards (e.g., 0.015 = 1.5 cents per point)
+     - Amex Membership Rewards (e.g., 0.016 = 1.6 cents per point)
+     - Capital One Venture Miles (e.g., 0.012 = 1.2 cents per mile)
+     - Citi ThankYou Points (e.g., 0.013 = 1.3 cents per point)
 
-```typescript
-await prisma.welcomeBonus.create({
-  data: {
-    cardId: csrCard.id,
-    requiredSpend: 6000,        // Your spend requirement
-    expectedPoints: 125000,      // Your points offer
-    // ... other fields
-  },
-})
-```
+3. **Card Management Section:**
+   - Click the edit icon (✏️) on any card to update:
+     - **Open Date:** When you opened/activated the card
+     - **Renewal Date (MM-DD):** Your cardmember year anniversary
+   - These dates ensure accurate benefit cycle calculations
 
-Then re-seed:
-```bash
-npm run db:seed
-```
+4. **Welcome Bonus Tracking:**
+   - Click the edit icon on any welcome bonus to update:
+     - **Current Spend:** Your actual spending progress (update regularly!)
+     - **Start/End Dates:** Adjust if your terms differ from defaults
 
-### Change Value-Per-Point Assumptions
-Update the default assumptions in the User model or via the Settings page (when implemented):
-
-```typescript
-valuePerPointRules: JSON.stringify({
-  UR: 0.015,      // 1.5 cents per Chase UR point
-  MR: 0.016,      // 1.6 cents per Amex MR point
-  VENTURE: 0.012, // 1.2 cents per Capital One mile
-  TY: 0.013,      // 1.3 cents per Citi TY point
-})
-```
+All changes save instantly and affect calculations across the entire app.
 
 ## 📝 Database Commands
 
