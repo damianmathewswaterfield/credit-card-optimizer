@@ -1,0 +1,27 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Node.js version (Netlify uses 18 by default, but 22 is better)
+  NODE_VERSION = "22"
+
+# Required environment variables that must be set in Netlify UI:
+#
+# DATABASE_URL - Connection string for your database
+#
+# For Turso (recommended for SQLite):
+#   DATABASE_URL = "libsql://your-db.turso.io"
+#   (Also set TURSO_AUTH_TOKEN)
+#
+# For Supabase Postgres:
+#   DATABASE_URL = "postgresql://user:password@db.xxx.supabase.co:5432/postgres"
+#
+# For local testing with SQLite (NOT for production):
+#   DATABASE_URL = "file:./prisma/dev.db"
+#
+# To set these:
+# Site settings → Build & deploy → Environment → Environment variables
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { CreditCard, TrendingUp } from 'lucide-react'
 import { prisma } from '@/lib/db'
 
+// Force dynamic rendering - database queries run at request time, not build time
+export const dynamic = 'force-dynamic'
+
 export default async function CardsPage() {
   const cards = await prisma.card.findMany({
     where: { active: true },

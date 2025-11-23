@@ -4,6 +4,9 @@ import { prisma } from '@/lib/db'
 import { calculateNextExpiry, isExpiringSoon } from '@/lib/benefits/expiry'
 import { formatDistanceToNow } from 'date-fns'
 
+// Force dynamic rendering - database queries run at request time, not build time
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const cards = await prisma.card.findMany({
     where: { active: true },
