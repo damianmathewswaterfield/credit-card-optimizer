@@ -35,7 +35,7 @@ async function main() {
       productName: 'Chase Sapphire Reserve',
       network: 'VISA',
       annualFee: 795,
-      openDate: '2025-01-15', // Adjust as needed
+      openDate: null, // TODO: Set your actual card open date
       renewalMonthDay: '01-15',
       active: true,
     },
@@ -120,7 +120,7 @@ async function main() {
       earned: false,
       expectedPoints: 125000,
       program: 'UR',
-      currentSpend: 1200, // Example progress
+      currentSpend: 0, // YOU must enter your actual spend
     },
   })
 
@@ -136,7 +136,7 @@ async function main() {
       productName: 'Citi Custom Cash',
       network: 'MASTERCARD',
       annualFee: 0,
-      openDate: '2024-06-10',
+      openDate: null, // TODO: Set your actual card open date
       renewalMonthDay: null, // No annual fee, so no renewal concept
       active: true,
     },
@@ -197,7 +197,7 @@ async function main() {
       expectedPoints: 20000, // $200 as 20k TY points
       actualPoints: 20000,
       program: 'TY',
-      currentSpend: 1500,
+      currentSpend: 0, // YOU must enter your actual spend
     },
   })
 
@@ -213,7 +213,7 @@ async function main() {
       productName: 'American Express Gold Card',
       network: 'AMEX',
       annualFee: 325,
-      openDate: '2024-03-01',
+      openDate: null, // TODO: Set your actual card open date
       renewalMonthDay: '03-01',
       active: true,
     },
@@ -361,7 +361,7 @@ async function main() {
       productName: 'Capital One Venture X',
       network: 'VISA',
       annualFee: 395,
-      openDate: '2024-08-01',
+      openDate: null, // TODO: Set your actual card open date
       renewalMonthDay: '08-01',
       active: true,
     },
@@ -499,7 +499,7 @@ async function main() {
       earned: false,
       expectedPoints: 100000,
       program: 'VENTURE',
-      currentSpend: 7500, // Example progress
+      currentSpend: 0, // YOU must enter your actual spend
     },
   })
 
