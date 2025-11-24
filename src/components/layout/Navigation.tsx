@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, CreditCard, Calendar, AlertCircle, Tag, Settings, Menu, X } from 'lucide-react'
+import { LayoutDashboard, CreditCard, Calendar, AlertCircle, Tag, TrendingUp, Settings, Menu, X } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useState } from 'react'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/cards', label: 'Cards', icon: CreditCard },
+  { href: '/value', label: 'Value', icon: TrendingUp },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/action-center', label: 'Actions', icon: AlertCircle },
   { href: '/deals', label: 'Deals', icon: Tag },
