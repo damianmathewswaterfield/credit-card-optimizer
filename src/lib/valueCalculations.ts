@@ -67,9 +67,10 @@ export function calculateBenefitValue(
       valueExtracted = 0
       potentialValue = 0
     } else if (benefit.type === 'INSURANCE' || benefit.type === 'INFORMATIONAL') {
-      // Insurance/info benefits: hard to quantify, we'll count as potential value but not extracted
+      // Insurance/info benefits: nominalValue is COVERAGE amount, not actual value
+      // Don't count insurance coverage amounts as potential value - they're not extractable value
       valueExtracted = 0
-      potentialValue = benefit.nominalValue || 0
+      potentialValue = 0
     }
   }
 
