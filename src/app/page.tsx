@@ -66,14 +66,6 @@ export default function DashboardPage() {
   // Sort by days until expiry
   expiringBenefits.sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry)
 
-  // Calculate total potential value
-  const totalPotentialValue = cards.reduce((sum, card) => {
-    const cardCredits = card.benefits
-      .filter((b: any) => b.type === 'RECURRING_CREDIT' && b.nominalValue && b.currency === 'USD')
-      .reduce((s: number, b: any) => s + (b.nominalValue || 0), 0)
-    return sum + cardCredits
-  }, 0)
-
   // In-progress welcome bonuses
   const activeWelcomeBonuses = cards
     .filter((card) => card.welcomeBonus && !card.welcomeBonus.earned)
@@ -91,7 +83,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="card">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary-50">
@@ -113,20 +105,6 @@ export default function DashboardPage() {
               <p className="text-sm text-neutral-600">Expiring Soon</p>
               <p className="text-2xl font-bold text-neutral-900">
                 {expiringBenefits.filter((eb) => eb.daysUntilExpiry <= 30).length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-success-50">
-              <TrendingUp className="w-5 h-5 text-success-600" />
-            </div>
-            <div>
-              <p className="text-sm text-neutral-600">Potential Value</p>
-              <p className="text-2xl font-bold text-neutral-900">
-                ${totalPotentialValue.toFixed(0)}
               </p>
             </div>
           </div>
@@ -197,7 +175,7 @@ export default function DashboardPage() {
                 <div className="flex-1">
                   <p className={`font-medium ${textColor}`}>{item.benefit.name}</p>
                   <p className={`text-sm mt-1 ${iconColor}`}>
-                    ${item.benefit.nominalValue?.toFixed(0)} at stake •{' '}
+                    ${(item.benefit.usageLimitPerCycle || item.benefit.nominalValue)?.toFixed(0)} at stake •{' '}
                     {item.card.productName} • Expires{' '}
                     {formatDistanceToNow(item.expiryDate, { addSuffix: true })}
                   </p>

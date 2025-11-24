@@ -22,10 +22,24 @@ export interface WelcomeBonusData {
   spendWindowEnd: string
 }
 
+export interface Deal {
+  id: string
+  cardId: string
+  merchant: string
+  cashbackPercent: number
+  category: string
+  validFrom: string
+  validTo: string
+  link?: string
+  notes?: string
+  createdAt: string
+}
+
 const STORAGE_KEYS = {
   USER_PREFERENCES: 'cardOptimizer_userPreferences',
   CARD_DATA: 'cardOptimizer_cardData',
   WELCOME_BONUS_DATA: 'cardOptimizer_welcomeBonusData',
+  DEALS: 'cardOptimizer_deals',
 }
 
 // Default values
@@ -199,5 +213,80 @@ export function enrichCardWithUserData(card: any): EnrichedCard {
     openDate: cardData.openDate,
     renewalMonthDay: cardData.renewalMonthDay,
     welcomeBonus,
+  }
+}
+
+// ============================================================================
+// Deals (cashback offers)
+// ============================================================================
+
+export function getDeals(): Deal[] {
+  if (!isBrowser) return []
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.DEALS)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (error) {
+    console.error('Failed to load deals:', error)
+  }
+
+  return []
+}
+
+export function addDeal(deal: Omit<Deal, 'id' | 'createdAt'>): Deal {
+  if (!isBrowser) throw new Error('Cannot add deal outside browser')
+
+  const newDeal: Deal = {
+    ...deal,
+    id: `deal_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+    createdAt: new Date().toISOString(),
+  }
+
+  try {
+    const deals = getDeals()
+    deals.push(newDeal)
+    localStorage.setItem(STORAGE_KEYS.DEALS, JSON.stringify(deals))
+    return newDeal
+  } catch (error) {
+    console.error('Failed to add deal:', error)
+    throw error
+  }
+}
+
+export function updateDeal(dealId: string, updates: Partial<Omit<Deal, 'id' | 'createdAt'>>): void {
+  if (!isBrowser) return
+
+  try {
+    const deals = getDeals()
+    const dealIndex = deals.findIndex((d) => d.id === dealId)
+
+    if (dealIndex === -1) {
+      throw new Error(`Deal with id ${dealId} not found`)
+    }
+
+    deals[dealIndex] = {
+      ...deals[dealIndex],
+      ...updates,
+    }
+
+    localStorage.setItem(STORAGE_KEYS.DEALS, JSON.stringify(deals))
+  } catch (error) {
+    console.error('Failed to update deal:', error)
+    throw error
+  }
+}
+
+export function deleteDeal(dealId: string): void {
+  if (!isBrowser) return
+
+  try {
+    const deals = getDeals()
+    const filtered = deals.filter((d) => d.id !== dealId)
+    localStorage.setItem(STORAGE_KEYS.DEALS, JSON.stringify(filtered))
+  } catch (error) {
+    console.error('Failed to delete deal:', error)
+    throw error
   }
 }
