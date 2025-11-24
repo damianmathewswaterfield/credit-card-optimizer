@@ -217,17 +217,11 @@ export default function ValuePage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b border-neutral-200">
+            <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-neutral-200">
               <div>
                 <p className="text-xs text-neutral-600 mb-1">Value Extracted</p>
                 <p className="font-semibold text-neutral-900">
                   ${cardValue.totalValueExtracted.toFixed(2)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-neutral-600 mb-1">Potential Value</p>
-                <p className="font-semibold text-neutral-900">
-                  ${cardValue.totalPotentialValue.toFixed(2)}
                 </p>
               </div>
               <div>
@@ -271,39 +265,27 @@ export default function ValuePage() {
 
                 {/* Top Benefits */}
                 <div>
-                  <h4 className="text-sm font-semibold text-neutral-900 mb-2">
-                    {cardValue.totalValueExtracted > 0 ? 'Top Benefits' : 'Available Benefits'}
-                  </h4>
+                  <h4 className="text-sm font-semibold text-neutral-900 mb-2">Top Benefits</h4>
                   <div className="space-y-2">
                     {cardValue.benefitValues
-                      .filter((bv) => bv.valueExtracted > 0 || bv.potentialValue > 0)
-                      .sort((a, b) => b.valueExtracted - a.valueExtracted || b.potentialValue - a.potentialValue)
+                      .filter((bv) => bv.valueExtracted > 0)
+                      .sort((a, b) => b.valueExtracted - a.valueExtracted)
                       .slice(0, 5)
                       .map((benefit) => (
                         <div key={benefit.benefitId} className="flex items-center justify-between text-sm p-2 bg-white rounded border border-neutral-200">
                           <div className="flex-1">
                             <p className="font-medium text-neutral-900">{benefit.benefitName}</p>
                             <p className="text-xs text-neutral-600">
-                              {benefit.valueExtracted > 0
-                                ? `${benefit.utilizationRate.toFixed(0)}% utilized`
-                                : benefit.potentialValue > 0
-                                ? `Up to $${benefit.potentialValue.toFixed(0)} possible`
-                                : 'Not tracked'
-                              }
+                              {benefit.utilizationRate.toFixed(0)}% utilized
                             </p>
                           </div>
                           <span className="font-semibold text-neutral-900">
-                            {benefit.valueExtracted > 0
-                              ? `$${benefit.valueExtracted.toFixed(2)}`
-                              : benefit.potentialValue > 0
-                              ? `$0 / $${benefit.potentialValue.toFixed(0)}`
-                              : '$0'
-                            }
+                            ${benefit.valueExtracted.toFixed(2)}
                           </span>
                         </div>
                       ))}
-                    {cardValue.benefitValues.filter((bv) => bv.valueExtracted > 0 || bv.potentialValue > 0).length === 0 && (
-                      <p className="text-sm text-neutral-600 italic">No trackable benefits found</p>
+                    {cardValue.benefitValues.filter((bv) => bv.valueExtracted > 0).length === 0 && (
+                      <p className="text-sm text-neutral-600 italic">Start logging usage to track value</p>
                     )}
                   </div>
                 </div>
