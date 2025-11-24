@@ -2,24 +2,18 @@
 
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import {
-  ArrowLeft,
-  ExternalLink,
-  Coins,
-  CreditCard as CreditCardIcon,
-  Shield,
-  Gift,
-} from 'lucide-react'
-import { calculateNextExpiry } from '@/lib/benefits/expiry'
-import { format, formatDistanceToNow } from 'date-fns'
+import { ArrowLeft } from 'lucide-react'
+import { format } from 'date-fns'
 import { CARDS } from '@/data/cards'
 import { enrichCardWithUserData } from '@/lib/storage'
 import { useState, useEffect } from 'react'
+import { BenefitCard } from '@/components/benefits/BenefitCard'
 
 export default function CardDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [card, setCard] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [resolvedId, setResolvedId] = useState<string | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     params.then((p) => {
@@ -30,7 +24,50 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
       }
       setLoading(false)
     })
-  }, [params])
+  }, [params, refreshKey])
+
+  const handleUsageUpdate = () => {
+    setRefreshKey((prev) => prev + 1)
+  }
+
+  // Calculate cycle dates for benefits
+  const getCycleDates = (cycleType: string) => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = today.getMonth()
+
+    switch (cycleType) {
+      case 'MONTHLY':
+        return {
+          start: new Date(year, month, 1).toISOString().split('T')[0],
+          end: new Date(year, month + 1, 0).toISOString().split('T')[0],
+        }
+      case 'CALENDAR_YEAR':
+        return {
+          start: `${year}-01-01`,
+          end: `${year}-12-31`,
+        }
+      case 'CARDMEMBER_YEAR':
+        if (card?.renewalMonthDay) {
+          const [renewalMonth, renewalDay] = card.renewalMonthDay.split('-').map(Number)
+          const renewalDate = new Date(year, renewalMonth - 1, renewalDay)
+          if (today < renewalDate) {
+            return {
+              start: new Date(year - 1, renewalMonth - 1, renewalDay).toISOString().split('T')[0],
+              end: new Date(year, renewalMonth - 1, renewalDay - 1).toISOString().split('T')[0],
+            }
+          } else {
+            return {
+              start: new Date(year, renewalMonth - 1, renewalDay).toISOString().split('T')[0],
+              end: new Date(year + 1, renewalMonth - 1, renewalDay - 1).toISOString().split('T')[0],
+            }
+          }
+        }
+        return { start: `${year}-01-01`, end: `${year}-12-31` }
+      default:
+        return { start: `${year}-01-01`, end: `${year}-12-31` }
+    }
+  }
 
   if (loading) {
     return (
@@ -52,134 +89,6 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
   const otherBenefits = card.benefits.filter(
     (b: any) => b.type !== 'RECURRING_CREDIT' && b.type !== 'MULTIPLIER'
   )
-
-  const getBenefitIcon = (type: string) => {
-    switch (type) {
-      case 'RECURRING_CREDIT':
-        return <Gift className="w-4 h-4" />
-      case 'MULTIPLIER':
-        return <Coins className="w-4 h-4" />
-      case 'INSURANCE':
-      case 'LOUNGE':
-        return <Shield className="w-4 h-4" />
-      default:
-        return <CreditCardIcon className="w-4 h-4" />
-    }
-  }
-
-  const getBenefitTypeBadge = (type: string) => {
-    const badges: Record<string, string> = {
-      RECURRING_CREDIT: 'badge-success',
-      MULTIPLIER: 'badge-neutral',
-      LOUNGE: 'badge-neutral',
-      INSURANCE: 'badge-neutral',
-      OTHER: 'badge-neutral',
-    }
-    return badges[type] || 'badge-neutral'
-  }
-
-  const formatBenefitValue = (benefit: any) => {
-    if (!benefit.nominalValue) return 'N/A'
-
-    if (benefit.currency === 'USD') {
-      return `$${benefit.nominalValue.toFixed(0)}`
-    } else if (benefit.currency === 'POINTS' || benefit.currency === 'MILES') {
-      return `${benefit.nominalValue.toFixed(0)} ${benefit.currency.toLowerCase()}`
-    }
-
-    return benefit.nominalValue.toString()
-  }
-
-  const getCycleLabel = (cycleType: string) => {
-    const labels: Record<string, string> = {
-      CALENDAR_YEAR: 'Calendar Year',
-      CARDMEMBER_YEAR: 'Cardmember Year',
-      MONTHLY: 'Monthly',
-      SEMIANNUAL_CALENDAR: 'Semi-Annual',
-      ONE_TIME: 'One Time',
-      PER_TRIP: 'Per Trip',
-    }
-    return labels[cycleType] || cycleType
-  }
-
-  const renderBenefitCard = (benefit: any) => {
-    let expiryInfo
-    try {
-      expiryInfo = calculateNextExpiry(
-        benefit.cycleType,
-        benefit.cycleDefinition,
-        today,
-        card.renewalMonthDay
-      )
-    } catch (e) {
-      expiryInfo = null
-    }
-
-    return (
-      <div key={benefit.id} className="card">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-start gap-3 flex-1">
-            <div className="p-2 rounded-lg bg-neutral-100">{getBenefitIcon(benefit.type)}</div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-neutral-900 mb-1">{benefit.name}</h3>
-              <p className="text-sm text-neutral-600">{benefit.triggerDescription}</p>
-            </div>
-          </div>
-          <span className={getBenefitTypeBadge(benefit.type)}>
-            {benefit.type.replace(/_/g, ' ')}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-neutral-200 text-sm">
-          <div>
-            <p className="text-neutral-600 mb-1">Value</p>
-            <p className="font-medium text-neutral-900">{formatBenefitValue(benefit)}</p>
-          </div>
-          <div>
-            <p className="text-neutral-600 mb-1">Cycle</p>
-            <p className="font-medium text-neutral-900">{getCycleLabel(benefit.cycleType)}</p>
-          </div>
-          {expiryInfo && expiryInfo.daysUntilExpiry < 365 && (
-            <div>
-              <p className="text-neutral-600 mb-1">Expires</p>
-              <p
-                className={`font-medium ${
-                  expiryInfo.daysUntilExpiry <= 30
-                    ? 'text-danger-700'
-                    : expiryInfo.daysUntilExpiry <= 60
-                    ? 'text-warning-700'
-                    : 'text-neutral-900'
-                }`}
-              >
-                {formatDistanceToNow(expiryInfo.nextExpiryDate, { addSuffix: true })}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {benefit.exclusionsSummary && (
-          <div className="mt-4 pt-4 border-t border-neutral-200">
-            <p className="text-xs text-neutral-600">
-              <strong>Important:</strong> {benefit.exclusionsSummary}
-            </p>
-          </div>
-        )}
-
-        {benefit.officialUrl && (
-          <div className="mt-3">
-            <a
-              href={benefit.officialUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1"
-            >
-              View official terms <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-        )}
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-8">
@@ -271,7 +180,21 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
       {recurringCredits.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-neutral-900">Recurring Credits</h2>
-          <div className="grid grid-cols-1 gap-4">{recurringCredits.map(renderBenefitCard)}</div>
+          <div className="grid grid-cols-1 gap-4">
+            {recurringCredits.map((benefit: any) => {
+              const cycleDates = getCycleDates(benefit.cycleType)
+              return (
+                <BenefitCard
+                  key={benefit.id}
+                  benefit={benefit}
+                  cardId={card.id}
+                  cycleStart={cycleDates.start}
+                  cycleEnd={cycleDates.end}
+                  onUsageUpdate={handleUsageUpdate}
+                />
+              )
+            })}
+          </div>
         </div>
       )}
 
@@ -279,7 +202,21 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
       {multipliers.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-neutral-900">Earning Multipliers</h2>
-          <div className="grid grid-cols-1 gap-4">{multipliers.map(renderBenefitCard)}</div>
+          <div className="grid grid-cols-1 gap-4">
+            {multipliers.map((benefit: any) => {
+              const cycleDates = getCycleDates(benefit.cycleType)
+              return (
+                <BenefitCard
+                  key={benefit.id}
+                  benefit={benefit}
+                  cardId={card.id}
+                  cycleStart={cycleDates.start}
+                  cycleEnd={cycleDates.end}
+                  onUsageUpdate={handleUsageUpdate}
+                />
+              )
+            })}
+          </div>
         </div>
       )}
 
@@ -287,7 +224,21 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
       {otherBenefits.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-neutral-900">Other Benefits</h2>
-          <div className="grid grid-cols-1 gap-4">{otherBenefits.map(renderBenefitCard)}</div>
+          <div className="grid grid-cols-1 gap-4">
+            {otherBenefits.map((benefit: any) => {
+              const cycleDates = getCycleDates(benefit.cycleType)
+              return (
+                <BenefitCard
+                  key={benefit.id}
+                  benefit={benefit}
+                  cardId={card.id}
+                  cycleStart={cycleDates.start}
+                  cycleEnd={cycleDates.end}
+                  onUsageUpdate={handleUsageUpdate}
+                />
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
