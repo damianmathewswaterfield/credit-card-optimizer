@@ -271,25 +271,40 @@ export default function ValuePage() {
 
                 {/* Top Benefits */}
                 <div>
-                  <h4 className="text-sm font-semibold text-neutral-900 mb-2">Top Benefits</h4>
+                  <h4 className="text-sm font-semibold text-neutral-900 mb-2">
+                    {cardValue.totalValueExtracted > 0 ? 'Top Benefits' : 'Available Benefits'}
+                  </h4>
                   <div className="space-y-2">
                     {cardValue.benefitValues
-                      .filter((bv) => bv.valueExtracted > 0)
-                      .sort((a, b) => b.valueExtracted - a.valueExtracted)
+                      .filter((bv) => bv.valueExtracted > 0 || bv.potentialValue > 0)
+                      .sort((a, b) => b.valueExtracted - a.valueExtracted || b.potentialValue - a.potentialValue)
                       .slice(0, 5)
                       .map((benefit) => (
                         <div key={benefit.benefitId} className="flex items-center justify-between text-sm p-2 bg-white rounded border border-neutral-200">
                           <div className="flex-1">
                             <p className="font-medium text-neutral-900">{benefit.benefitName}</p>
                             <p className="text-xs text-neutral-600">
-                              {benefit.utilizationRate.toFixed(0)}% utilized
+                              {benefit.valueExtracted > 0
+                                ? `${benefit.utilizationRate.toFixed(0)}% utilized`
+                                : benefit.potentialValue > 0
+                                ? `Up to $${benefit.potentialValue.toFixed(0)} possible`
+                                : 'Not tracked'
+                              }
                             </p>
                           </div>
                           <span className="font-semibold text-neutral-900">
-                            ${benefit.valueExtracted.toFixed(2)}
+                            {benefit.valueExtracted > 0
+                              ? `$${benefit.valueExtracted.toFixed(2)}`
+                              : benefit.potentialValue > 0
+                              ? `$0 / $${benefit.potentialValue.toFixed(0)}`
+                              : '$0'
+                            }
                           </span>
                         </div>
                       ))}
+                    {cardValue.benefitValues.filter((bv) => bv.valueExtracted > 0 || bv.potentialValue > 0).length === 0 && (
+                      <p className="text-sm text-neutral-600 italic">No trackable benefits found</p>
+                    )}
                   </div>
                 </div>
               </div>
