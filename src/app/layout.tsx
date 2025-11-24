@@ -5,6 +5,28 @@ import { Navigation } from '@/components/layout/Navigation'
 export const metadata: Metadata = {
   title: 'Credit Card Optimizer',
   description: 'Maximize your credit card benefits',
+  icons: {
+    icon: '/favicon.svg',
+  },
+  openGraph: {
+    title: 'Credit Card Optimizer',
+    description: 'Maximize your credit card benefits',
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Credit Card Optimizer',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Credit Card Optimizer',
+    description: 'Maximize your credit card benefits',
+    images: ['/og-image.svg'],
+  },
 }
 
 export default function RootLayout({
