@@ -35,11 +35,36 @@ export interface Deal {
   createdAt: string
 }
 
+export interface BenefitUsageEntry {
+  id: string
+  date: string
+  amount: number              // For SPENDING tracking
+  count?: number              // For COUNTER tracking
+  merchant?: string
+  notes?: string
+  receiptUrl?: string         // Optional receipt upload
+}
+
+export interface BenefitUsage {
+  benefitId: string
+  cardId: string
+  cycleStart: string
+  cycleEnd: string
+  usages: BenefitUsageEntry[]
+  totalUsed: number           // Total amount or count
+  // For BOOLEAN tracking (subscriptions, status)
+  activated?: boolean
+  activationDate?: string
+  // For THRESHOLD tracking
+  progressToThreshold?: number
+}
+
 const STORAGE_KEYS = {
   USER_PREFERENCES: 'cardOptimizer_userPreferences',
   CARD_DATA: 'cardOptimizer_cardData',
   WELCOME_BONUS_DATA: 'cardOptimizer_welcomeBonusData',
   DEALS: 'cardOptimizer_deals',
+  BENEFIT_USAGE: 'cardOptimizer_benefitUsage',
 }
 
 // Default values
@@ -287,6 +312,154 @@ export function deleteDeal(dealId: string): void {
     localStorage.setItem(STORAGE_KEYS.DEALS, JSON.stringify(filtered))
   } catch (error) {
     console.error('Failed to delete deal:', error)
+    throw error
+  }
+}
+
+// ============================================================================
+// Benefit Usage Tracking
+// ============================================================================
+
+export function getBenefitUsage(benefitId: string, cycleStart: string, cycleEnd: string): BenefitUsage | null {
+  if (!isBrowser) return null
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.BENEFIT_USAGE)
+    if (stored) {
+      const allUsage: BenefitUsage[] = JSON.parse(stored)
+      return allUsage.find(
+        (u) => u.benefitId === benefitId && u.cycleStart === cycleStart && u.cycleEnd === cycleEnd
+      ) || null
+    }
+  } catch (error) {
+    console.error('Failed to load benefit usage:', error)
+  }
+
+  return null
+}
+
+export function getAllBenefitUsage(): BenefitUsage[] {
+  if (!isBrowser) return []
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.BENEFIT_USAGE)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (error) {
+    console.error('Failed to load all benefit usage:', error)
+  }
+
+  return []
+}
+
+export function addBenefitUsage(
+  benefitId: string,
+  cardId: string,
+  cycleStart: string,
+  cycleEnd: string,
+  entry: Omit<BenefitUsageEntry, 'id'>
+): void {
+  if (!isBrowser) return
+
+  try {
+    const allUsage = getAllBenefitUsage()
+
+    // Find or create usage record for this benefit and cycle
+    let usageRecord = allUsage.find(
+      (u) => u.benefitId === benefitId && u.cycleStart === cycleStart && u.cycleEnd === cycleEnd
+    )
+
+    const newEntry: BenefitUsageEntry = {
+      ...entry,
+      id: `usage_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+    }
+
+    if (usageRecord) {
+      // Add to existing record
+      usageRecord.usages.push(newEntry)
+      usageRecord.totalUsed += entry.amount
+    } else {
+      // Create new record
+      usageRecord = {
+        benefitId,
+        cardId,
+        cycleStart,
+        cycleEnd,
+        usages: [newEntry],
+        totalUsed: entry.amount,
+      }
+      allUsage.push(usageRecord)
+    }
+
+    localStorage.setItem(STORAGE_KEYS.BENEFIT_USAGE, JSON.stringify(allUsage))
+  } catch (error) {
+    console.error('Failed to add benefit usage:', error)
+    throw error
+  }
+}
+
+export function setBenefitActivation(
+  benefitId: string,
+  cardId: string,
+  activated: boolean,
+  activationDate?: string
+): void {
+  if (!isBrowser) return
+
+  try {
+    const allUsage = getAllBenefitUsage()
+
+    // Find or create usage record
+    let usageRecord = allUsage.find((u) => u.benefitId === benefitId)
+
+    if (usageRecord) {
+      usageRecord.activated = activated
+      if (activationDate) {
+        usageRecord.activationDate = activationDate
+      }
+    } else {
+      // Create new record for activation tracking
+      usageRecord = {
+        benefitId,
+        cardId,
+        cycleStart: '',
+        cycleEnd: '',
+        usages: [],
+        totalUsed: 0,
+        activated,
+        activationDate: activationDate || new Date().toISOString(),
+      }
+      allUsage.push(usageRecord)
+    }
+
+    localStorage.setItem(STORAGE_KEYS.BENEFIT_USAGE, JSON.stringify(allUsage))
+  } catch (error) {
+    console.error('Failed to set benefit activation:', error)
+    throw error
+  }
+}
+
+export function deleteBenefitUsageEntry(benefitId: string, entryId: string): void {
+  if (!isBrowser) return
+
+  try {
+    const allUsage = getAllBenefitUsage()
+
+    allUsage.forEach((usageRecord) => {
+      if (usageRecord.benefitId === benefitId) {
+        const entryIndex = usageRecord.usages.findIndex((e) => e.id === entryId)
+        if (entryIndex !== -1) {
+          const deletedEntry = usageRecord.usages[entryIndex]
+          usageRecord.totalUsed -= deletedEntry.amount
+          usageRecord.usages.splice(entryIndex, 1)
+        }
+      }
+    })
+
+    localStorage.setItem(STORAGE_KEYS.BENEFIT_USAGE, JSON.stringify(allUsage))
+  } catch (error) {
+    console.error('Failed to delete benefit usage entry:', error)
     throw error
   }
 }
