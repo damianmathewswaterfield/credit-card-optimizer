@@ -50,9 +50,10 @@ export default function CalendarPage() {
               date: expiryInfo.nextExpiryDate,
               title: `${benefit.name} expires`,
               type: 'expiring',
-              value: benefit.nominalValue ? `$${benefit.nominalValue.toFixed(0)}` : undefined,
+              value: benefit.usageLimitPerCycle ? `$${benefit.usageLimitPerCycle.toFixed(0)}` : undefined,
               cardName: card.productName,
               cardId: card.id,
+              benefitId: benefit.id,
             })
 
             // Reset event (day after expiry)
@@ -64,9 +65,10 @@ export default function CalendarPage() {
                 date: resetDate,
                 title: `${benefit.name} resets`,
                 type: 'reset',
-                value: benefit.nominalValue ? `$${benefit.nominalValue.toFixed(0)}` : undefined,
+                value: benefit.usageLimitPerCycle ? `$${benefit.usageLimitPerCycle.toFixed(0)}` : undefined,
                 cardName: card.productName,
                 cardId: card.id,
+                benefitId: benefit.id,
               })
             }
           }

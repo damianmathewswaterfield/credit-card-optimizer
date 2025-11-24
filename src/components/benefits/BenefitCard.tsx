@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, TrendingUp, Calendar, DollarSign, Hash, CheckCircle, AlertCircle } from 'lucide-react'
+import { Plus, Calendar, DollarSign, CheckCircle, AlertCircle } from 'lucide-react'
 import type { Benefit } from '@/data/cards'
 import { LogUsageModal } from './LogUsageModal'
 import { getBenefitUsage, getAllBenefitUsage } from '@/lib/storage'
+import { getBenefitIcon } from '@/lib/benefitIcons'
 
 interface BenefitCardProps {
   benefit: Benefit
@@ -61,40 +62,16 @@ export function BenefitCard({ benefit, cardId, cycleStart, cycleEnd, onUsageUpda
     neutral: 'bg-neutral-50 border-neutral-200 text-neutral-700',
   }
 
-  const iconMap: Record<string, React.ReactNode> = {
-    '✈️': '✈️',
-    '🍔': '🍔',
-    '🍽️': '🍽️',
-    '🎫': '🎫',
-    '🏨': '🏨',
-    '🚗': '🚗',
-    '🍎': '🍎',
-    '💳': '💳',
-    '💰': '💰',
-    '🛡️': '🛡️',
-    '✨': '✨',
-    '⭐': '⭐',
-    '💎': '💎',
-    '🛫': '🛫',
-    '⏰': '⏰',
-    '🧳': '🧳',
-    '📦': '📦',
-    '🔒': '🔒',
-    '📊': '📊',
-    '🛒': '🛒',
-    '🍴': '🍴',
-    '☕': '☕',
-    '🍕': '🍕',
-  }
+  const BenefitIcon = getBenefitIcon(benefit)
 
   return (
     <>
       <div className={`card border ${statusColors[statusColor]}`}>
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-start gap-3 flex-1">
-            {benefit.icon && (
-              <span className="text-2xl flex-shrink-0">{iconMap[benefit.icon] || benefit.icon}</span>
-            )}
+            <div className="p-2 rounded-lg bg-neutral-100 flex-shrink-0">
+              <BenefitIcon className="w-5 h-5 text-neutral-700" />
+            </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-neutral-900 mb-1">{benefit.name}</h3>
               <p className="text-sm text-neutral-600 line-clamp-2">{benefit.triggerDescription}</p>

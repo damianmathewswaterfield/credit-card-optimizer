@@ -28,6 +28,18 @@ export default function ActionCenterPage() {
 
   const today = new Date()
 
+  // Helper to get cycle label
+  const getCycleLabel = (cycleType: string) => {
+    const labels: Record<string, string> = {
+      MONTHLY: '/month',
+      CALENDAR_YEAR: '/year',
+      CARDMEMBER_YEAR: '/year',
+      SEMIANNUAL_CALENDAR: '/6 months',
+      ONE_TIME: '',
+    }
+    return labels[cycleType] || ''
+  }
+
   // Section 1: Expiring Soon
   const expiringBenefits: Array<{
     benefit: any
@@ -35,11 +47,12 @@ export default function ActionCenterPage() {
     daysUntilExpiry: number
     expiryDate: Date
     valueAtRisk: number
+    cycleLabel: string
   }> = []
 
   for (const card of cards) {
     for (const benefit of card.benefits) {
-      if (benefit.type === 'RECURRING_CREDIT' && benefit.nominalValue && benefit.currency === 'USD') {
+      if (benefit.type === 'RECURRING_CREDIT' && benefit.usageLimitPerCycle && benefit.currency === 'USD') {
         try {
           const expiryInfo = calculateNextExpiry(
             benefit.cycleType,
@@ -54,7 +67,8 @@ export default function ActionCenterPage() {
               card,
               daysUntilExpiry: expiryInfo.daysUntilExpiry,
               expiryDate: expiryInfo.nextExpiryDate,
-              valueAtRisk: benefit.usageLimitPerCycle || benefit.nominalValue,
+              valueAtRisk: benefit.usageLimitPerCycle,
+              cycleLabel: getCycleLabel(benefit.cycleType),
             })
           }
         } catch (e) {
@@ -171,9 +185,9 @@ export default function ActionCenterPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-danger-700">
-                        ${item.valueAtRisk.toFixed(0)}
+                        ${item.valueAtRisk.toFixed(0)}{item.cycleLabel}
                       </p>
-                      <p className="text-xs text-neutral-600">at risk</p>
+                      <p className="text-xs text-neutral-600">expiring</p>
                     </div>
                   </div>
 
@@ -183,10 +197,10 @@ export default function ActionCenterPage() {
                   </div>
 
                   <Link
-                    href={`/cards/${item.card.id}`}
-                    className="mt-3 inline-block text-sm text-primary-600 hover:text-primary-700 font-medium"
+                    href={`/benefit/${item.benefit.id}`}
+                    className="mt-3 inline-block px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
                   >
-                    View card details →
+                    Log Usage →
                   </Link>
                 </div>
               )

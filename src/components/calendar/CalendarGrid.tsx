@@ -25,6 +25,7 @@ export interface CalendarEvent {
   value?: string
   cardName: string
   cardId: string
+  benefitId?: string
 }
 
 interface CalendarGridProps {
@@ -167,7 +168,7 @@ export function CalendarGrid({ events, onEventClick }: CalendarGridProps) {
                   {dayEvents.slice(0, 3).map((event) => (
                     <Link
                       key={event.id}
-                      href={`/cards/${event.cardId}`}
+                      href={event.benefitId ? `/benefit/${event.benefitId}` : `/cards/${event.cardId}`}
                       className={`block w-full text-left px-2 py-1 rounded text-xs font-medium text-white truncate transition-colors ${getEventColor(
                         event.type
                       )}`}
