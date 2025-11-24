@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
+import Link from 'next/link'
 import {
   format,
   startOfMonth,
@@ -164,17 +165,17 @@ export function CalendarGrid({ events, onEventClick }: CalendarGridProps) {
 
                 <div className="space-y-1">
                   {dayEvents.slice(0, 3).map((event) => (
-                    <button
+                    <Link
                       key={event.id}
-                      onClick={() => onEventClick?.(event)}
-                      className={`w-full text-left px-2 py-1 rounded text-xs font-medium text-white truncate transition-colors ${getEventColor(
+                      href={`/cards/${event.cardId}`}
+                      className={`block w-full text-left px-2 py-1 rounded text-xs font-medium text-white truncate transition-colors ${getEventColor(
                         event.type
                       )}`}
-                      title={event.title}
+                      title={`${event.title} - ${event.cardName}`}
                     >
                       <span className="mr-1">{getEventIcon(event.type)}</span>
                       {event.title}
-                    </button>
+                    </Link>
                   ))}
                   {dayEvents.length > 3 && (
                     <div className="text-xs text-neutral-600 px-2">
