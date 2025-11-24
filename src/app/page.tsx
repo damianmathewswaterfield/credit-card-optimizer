@@ -29,6 +29,18 @@ export default function DashboardPage() {
 
   const today = new Date()
 
+  // Helper to get cycle label
+  const getCycleLabel = (cycleType: string) => {
+    const labels: Record<string, string> = {
+      MONTHLY: '/month',
+      CALENDAR_YEAR: '/year',
+      CARDMEMBER_YEAR: '/year',
+      SEMIANNUAL_CALENDAR: '/6 months',
+      ONE_TIME: '',
+    }
+    return labels[cycleType] || ''
+  }
+
   // Calculate expiring benefits
   const expiringBenefits: Array<{
     benefit: any
@@ -39,7 +51,7 @@ export default function DashboardPage() {
 
   for (const card of cards) {
     for (const benefit of card.benefits) {
-      if (benefit.type === 'RECURRING_CREDIT' && benefit.nominalValue) {
+      if (benefit.type === 'RECURRING_CREDIT' && benefit.usageLimitPerCycle) {
         try {
           const expiryInfo = calculateNextExpiry(
             benefit.cycleType,
@@ -168,14 +180,16 @@ export default function DashboardPage() {
             return (
               <Link
                 key={`${item.card.id}-${item.benefit.id}`}
-                href={`/cards/${item.card.id}`}
+                href={`/benefit/${item.benefit.id}`}
                 className={`flex items-start gap-3 p-4 rounded-lg border ${bgColor} hover:opacity-90 transition-opacity`}
               >
                 <AlertCircle className={`w-5 h-5 ${iconColor} mt-0.5`} />
                 <div className="flex-1">
-                  <p className={`font-medium ${textColor}`}>{item.benefit.name}</p>
+                  <p className={`font-medium ${textColor}`}>
+                    {item.benefit.name.replace(/\$\d+\s*(Annual|Yearly|Year)/gi, '').trim()}
+                  </p>
                   <p className={`text-sm mt-1 ${iconColor}`}>
-                    ${(item.benefit.usageLimitPerCycle || item.benefit.nominalValue)?.toFixed(0)} at stake •{' '}
+                    ${item.benefit.usageLimitPerCycle.toFixed(0)}{getCycleLabel(item.benefit.cycleType)} at stake •{' '}
                     {item.card.productName} • Expires{' '}
                     {formatDistanceToNow(item.expiryDate, { addSuffix: true })}
                   </p>
