@@ -1,7 +1,6 @@
 import { differenceInDays } from 'date-fns'
-import type { CycleType } from '@prisma/client'
 import type { BenefitCycleDefinition, NextExpiryResult } from '@/types'
-import { getCurrentCycleEnd, getNextResetDate, parseCycleDefinition } from './cycles'
+import { getCurrentCycleEnd, getNextResetDate, parseCycleDefinition, type CycleType } from './cycles'
 
 /**
  * Calculate next expiry date and days until expiry for a benefit

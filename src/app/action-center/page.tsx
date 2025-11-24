@@ -1,29 +1,37 @@
+'use client'
+
 import Link from 'next/link'
 import { AlertCircle, TrendingDown, CheckCircle } from 'lucide-react'
-import { prisma } from '@/lib/db'
 import { calculateNextExpiry } from '@/lib/benefits/expiry'
 import { format, formatDistanceToNow } from 'date-fns'
+import { CARDS } from '@/data/cards'
+import { enrichCardWithUserData, type EnrichedCard } from '@/lib/storage'
+import { useState, useEffect } from 'react'
 
-// Force dynamic rendering - database queries run at request time, not build time
-export const dynamic = 'force-dynamic'
+export default function ActionCenterPage() {
+  const [cards, setCards] = useState<EnrichedCard[]>([])
+  const [loading, setLoading] = useState(true)
 
-export default async function ActionCenterPage() {
-  const cards = await prisma.card.findMany({
-    where: { active: true },
-    include: {
-      benefits: {
-        where: { active: true },
-      },
-      welcomeBonuses: true,
-    },
-  })
+  useEffect(() => {
+    const enrichedCards = CARDS.map(enrichCardWithUserData)
+    setCards(enrichedCards)
+    setLoading(false)
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-neutral-600">Loading...</p>
+      </div>
+    )
+  }
 
   const today = new Date()
 
   // Section 1: Expiring Soon
   const expiringBenefits: Array<{
-    benefit: (typeof cards)[0]['benefits'][0]
-    card: (typeof cards)[0]
+    benefit: any
+    card: EnrichedCard
     daysUntilExpiry: number
     expiryDate: Date
     valueAtRisk: number
@@ -60,26 +68,26 @@ export default async function ActionCenterPage() {
 
   // Section 2: Incomplete Welcome Bonuses
   const activeWelcomeBonuses = cards
-    .flatMap((card) =>
-      card.welcomeBonuses.filter((wb) => !wb.earned).map((wb) => ({ card, welcomeBonus: wb }))
-    )
-    .map((item) => {
+    .filter((card) => card.welcomeBonus && !card.welcomeBonus.earned)
+    .map((card) => {
+      const welcomeBonus = card.welcomeBonus!
       const daysLeft = Math.max(
         0,
         Math.ceil(
-          (new Date(item.welcomeBonus.spendWindowEnd).getTime() - today.getTime()) /
+          (new Date(welcomeBonus.spendWindowEnd).getTime() - today.getTime()) /
             (1000 * 60 * 60 * 24)
         )
       )
 
-      const remaining = item.welcomeBonus.requiredSpend - item.welcomeBonus.currentSpend
-      const progress = (item.welcomeBonus.currentSpend / item.welcomeBonus.requiredSpend) * 100
+      const remaining = welcomeBonus.requiredSpend - welcomeBonus.currentSpend
+      const progress = (welcomeBonus.currentSpend / welcomeBonus.requiredSpend) * 100
 
       const requiredDaily = daysLeft > 0 ? remaining / daysLeft : 0
       const requiredWeekly = requiredDaily * 7
 
       return {
-        ...item,
+        card,
+        welcomeBonus,
         daysLeft,
         remaining,
         progress,
@@ -92,13 +100,13 @@ export default async function ActionCenterPage() {
   const monthlyCredits = cards.flatMap((card) =>
     card.benefits
       .filter(
-        (b) =>
+        (b: any) =>
           b.type === 'RECURRING_CREDIT' &&
           b.cycleType === 'MONTHLY' &&
           b.nominalValue &&
           b.currency === 'USD'
       )
-      .map((benefit) => ({ card, benefit }))
+      .map((benefit: any) => ({ card, benefit }))
   )
 
   return (
@@ -295,7 +303,7 @@ export default async function ActionCenterPage() {
             </p>
 
             <div className="space-y-2">
-              {monthlyCredits.map((item) => (
+              {monthlyCredits.map((item: any) => (
                 <div
                   key={`${item.card.id}-${item.benefit.id}`}
                   className="flex items-center justify-between py-2 border-b border-primary-200 last:border-0"

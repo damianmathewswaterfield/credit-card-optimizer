@@ -1,30 +1,25 @@
-import { prisma } from '@/lib/db'
+'use client'
+
+import { useState, useEffect } from 'react'
 import { UserPreferencesForm } from '@/components/settings/UserPreferencesForm'
 import { CardManagement } from '@/components/settings/CardManagement'
+import { CARDS } from '@/data/cards'
+import { enrichCardWithUserData } from '@/lib/storage'
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
+export default function SettingsPage() {
+  const [cards, setCards] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-export default async function SettingsPage() {
-  const user = await prisma.user.findFirst()
-  const cards = await prisma.card.findMany({
-    where: { active: true },
-    include: {
-      welcomeBonuses: true,
-    },
-    orderBy: { createdAt: 'asc' },
-  })
+  useEffect(() => {
+    const enrichedCards = CARDS.map(enrichCardWithUserData)
+    setCards(enrichedCards)
+    setLoading(false)
+  }, [])
 
-  if (!user) {
+  if (loading) {
     return (
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-neutral-900">Settings</h1>
-          <p className="text-neutral-600 mt-2">Configure your preferences</p>
-        </div>
-        <div className="card">
-          <p className="text-danger-700">No user found. Please run database seed.</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-neutral-600">Loading...</p>
       </div>
     )
   }
@@ -41,13 +36,7 @@ export default async function SettingsPage() {
       {/* User Preferences */}
       <div className="card">
         <h2 className="text-xl font-semibold text-neutral-900 mb-6">User Preferences</h2>
-        <UserPreferencesForm
-          initialData={{
-            timezone: user.timezone,
-            defaultReminderDays: user.defaultReminderDays,
-            valuePerPointRules: user.valuePerPointRules,
-          }}
-        />
+        <UserPreferencesForm />
       </div>
 
       {/* Card Management */}

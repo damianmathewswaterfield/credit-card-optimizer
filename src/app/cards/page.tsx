@@ -1,24 +1,28 @@
+'use client'
+
 import Link from 'next/link'
-import { CreditCard, TrendingUp } from 'lucide-react'
-import { prisma } from '@/lib/db'
+import { CreditCard } from 'lucide-react'
+import { CARDS } from '@/data/cards'
+import { enrichCardWithUserData, type EnrichedCard } from '@/lib/storage'
+import { useState, useEffect } from 'react'
 
-// Force dynamic rendering - database queries run at request time, not build time
-export const dynamic = 'force-dynamic'
+export default function CardsPage() {
+  const [cards, setCards] = useState<EnrichedCard[]>([])
+  const [loading, setLoading] = useState(true)
 
-export default async function CardsPage() {
-  const cards = await prisma.card.findMany({
-    where: { active: true },
-    include: {
-      benefits: true,
-      welcomeBonuses: true,
-      _count: {
-        select: {
-          benefits: true,
-        },
-      },
-    },
-    orderBy: { createdAt: 'asc' },
-  })
+  useEffect(() => {
+    const enrichedCards = CARDS.map(enrichCardWithUserData)
+    setCards(enrichedCards)
+    setLoading(false)
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-neutral-600">Loading...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
@@ -32,10 +36,10 @@ export default async function CardsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {cards.map((card) => {
           const recurringCredits = card.benefits.filter(
-            (b) => b.type === 'RECURRING_CREDIT' && b.nominalValue && b.currency === 'USD'
+            (b: any) => b.type === 'RECURRING_CREDIT' && b.nominalValue && b.currency === 'USD'
           )
 
-          const totalAnnualCredits = recurringCredits.reduce((sum, b) => {
+          const totalAnnualCredits = recurringCredits.reduce((sum: number, b: any) => {
             return sum + (b.nominalValue || 0)
           }, 0)
 
@@ -89,7 +93,7 @@ export default async function CardsPage() {
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-sm text-neutral-600">Benefits Tracked</span>
-                    <span className="font-medium text-neutral-900">{card._count.benefits}</span>
+                    <span className="font-medium text-neutral-900">{card.benefits.length}</span>
                   </div>
                 </div>
               </div>
@@ -102,10 +106,7 @@ export default async function CardsPage() {
         <div className="card text-center py-12">
           <CreditCard className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-neutral-900 mb-2">No cards yet</h3>
-          <p className="text-neutral-600">
-            Run <code className="px-2 py-1 bg-neutral-100 rounded">npm run db:seed</code> to add
-            your cards.
-          </p>
+          <p className="text-neutral-600">No cards configured.</p>
         </div>
       )}
     </div>

@@ -1,29 +1,38 @@
+'use client'
+
 import { CreditCard, Calendar, AlertCircle, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { prisma } from '@/lib/db'
 import { calculateNextExpiry, isExpiringSoon } from '@/lib/benefits/expiry'
 import { formatDistanceToNow } from 'date-fns'
+import { CARDS } from '@/data/cards'
+import { enrichCardWithUserData, type EnrichedCard } from '@/lib/storage'
+import { useState, useEffect } from 'react'
 
-// Force dynamic rendering - database queries run at request time, not build time
-export const dynamic = 'force-dynamic'
+export default function DashboardPage() {
+  const [cards, setCards] = useState<EnrichedCard[]>([])
+  const [loading, setLoading] = useState(true)
 
-export default async function DashboardPage() {
-  const cards = await prisma.card.findMany({
-    where: { active: true },
-    include: {
-      benefits: {
-        where: { active: true },
-      },
-      welcomeBonuses: true,
-    },
-  })
+  useEffect(() => {
+    // Load cards with user data from localStorage
+    const enrichedCards = CARDS.map(enrichCardWithUserData)
+    setCards(enrichedCards)
+    setLoading(false)
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-neutral-600">Loading...</p>
+      </div>
+    )
+  }
 
   const today = new Date()
 
   // Calculate expiring benefits
   const expiringBenefits: Array<{
-    benefit: (typeof cards)[0]['benefits'][0]
-    card: (typeof cards)[0]
+    benefit: any
+    card: EnrichedCard
     daysUntilExpiry: number
     expiryDate: Date
   }> = []
@@ -60,18 +69,19 @@ export default async function DashboardPage() {
   // Calculate total potential value
   const totalPotentialValue = cards.reduce((sum, card) => {
     const cardCredits = card.benefits
-      .filter((b) => b.type === 'RECURRING_CREDIT' && b.nominalValue && b.currency === 'USD')
-      .reduce((s, b) => s + (b.nominalValue || 0), 0)
+      .filter((b: any) => b.type === 'RECURRING_CREDIT' && b.nominalValue && b.currency === 'USD')
+      .reduce((s: number, b: any) => s + (b.nominalValue || 0), 0)
     return sum + cardCredits
   }, 0)
 
   // In-progress welcome bonuses
-  const activeWelcomeBonuses = cards.flatMap((card) =>
-    card.welcomeBonuses.filter((wb) => !wb.earned).map((wb) => ({ card, welcomeBonus: wb }))
-  )
+  const activeWelcomeBonuses = cards
+    .filter((card) => card.welcomeBonus && !card.welcomeBonus.earned)
+    .map((card) => ({ card, welcomeBonus: card.welcomeBonus! }))
 
   // Count upcoming deadlines (expiring soon + welcome bonuses)
-  const upcomingDeadlines = expiringBenefits.filter((eb) => eb.daysUntilExpiry <= 30).length + activeWelcomeBonuses.length
+  const upcomingDeadlines =
+    expiringBenefits.filter((eb) => eb.daysUntilExpiry <= 30).length + activeWelcomeBonuses.length
 
   return (
     <div className="space-y-8">

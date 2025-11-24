@@ -4,47 +4,52 @@ import { useState } from 'react'
 import { Save } from 'lucide-react'
 
 interface UserPreferencesFormProps {
-  initialData: {
+  initialData?: {
     timezone: string
     defaultReminderDays: number
     valuePerPointRules: string
   }
 }
 
-export function UserPreferencesForm({ initialData }: UserPreferencesFormProps) {
-  const [timezone, setTimezone] = useState(initialData.timezone)
-  const [reminderDays, setReminderDays] = useState(initialData.defaultReminderDays)
-  const [pointValues, setPointValues] = useState(() => {
-    try {
-      return JSON.parse(initialData.valuePerPointRules)
-    } catch {
-      return { UR: 0.015, MR: 0.016, VENTURE: 0.012, TY: 0.013 }
+export function UserPreferencesForm({ initialData }: UserPreferencesFormProps = {}) {
+  // Load initial data from localStorage if available
+  const [prefs, setPrefs] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('cardOptimizer_userPreferences')
+      if (stored) {
+        return JSON.parse(stored)
+      }
+    }
+    return {
+      timezone: initialData?.timezone || 'America/New_York',
+      defaultReminderDays: initialData?.defaultReminderDays || 7,
+      valuePerPointRules: initialData?.valuePerPointRules
+        ? JSON.parse(initialData.valuePerPointRules)
+        : { UR: 0.015, MR: 0.016, VENTURE: 0.012, TY: 0.013 },
     }
   })
+
+  const [timezone, setTimezone] = useState(prefs.timezone)
+  const [reminderDays, setReminderDays] = useState(prefs.defaultReminderDays)
+  const [pointValues, setPointValues] = useState(prefs.valuePerPointRules)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
 
-  const handleSave = async () => {
+  const handleSave = () => {
     setSaving(true)
     setMessage('')
 
     try {
-      const response = await fetch('/api/user', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          timezone,
-          defaultReminderDays: reminderDays,
-          valuePerPointRules: JSON.stringify(pointValues),
-        }),
-      })
-
-      if (response.ok) {
-        setMessage('Settings saved successfully!')
-        setTimeout(() => setMessage(''), 3000)
-      } else {
-        setMessage('Failed to save settings')
+      const updated = {
+        timezone,
+        defaultReminderDays: reminderDays,
+        valuePerPointRules: pointValues,
       }
+      localStorage.setItem('cardOptimizer_userPreferences', JSON.stringify(updated))
+      setMessage('Settings saved successfully!')
+      setTimeout(() => setMessage(''), 3000)
+      // Trigger page reload to refresh all data
+      setTimeout(() => window.location.reload(), 500)
     } catch (error) {
       setMessage('Failed to save settings')
     } finally {

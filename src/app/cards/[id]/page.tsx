@@ -1,24 +1,44 @@
+'use client'
+
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ExternalLink, Coins, CreditCard as CreditCardIcon, Shield, Gift } from 'lucide-react'
-import { prisma } from '@/lib/db'
+import {
+  ArrowLeft,
+  ExternalLink,
+  Coins,
+  CreditCard as CreditCardIcon,
+  Shield,
+  Gift,
+} from 'lucide-react'
 import { calculateNextExpiry } from '@/lib/benefits/expiry'
 import { format, formatDistanceToNow } from 'date-fns'
+import { CARDS } from '@/data/cards'
+import { enrichCardWithUserData } from '@/lib/storage'
+import { useState, useEffect } from 'react'
 
-// Force dynamic rendering - database queries run at request time, not build time
-export const dynamic = 'force-dynamic'
+export default function CardDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const [card, setCard] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [resolvedId, setResolvedId] = useState<string | null>(null)
 
-export default async function CardDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = await params
-  const card = await prisma.card.findUnique({
-    where: { id: resolvedParams.id },
-    include: {
-      benefits: {
-        orderBy: { priorityScore: 'desc' },
-      },
-      welcomeBonuses: true,
-    },
-  })
+  useEffect(() => {
+    params.then((p) => {
+      setResolvedId(p.id)
+      const foundCard = CARDS.find((c) => c.id === p.id)
+      if (foundCard) {
+        setCard(enrichCardWithUserData(foundCard))
+      }
+      setLoading(false)
+    })
+  }, [params])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-neutral-600">Loading...</p>
+      </div>
+    )
+  }
 
   if (!card) {
     notFound()
@@ -27,10 +47,10 @@ export default async function CardDetailPage({ params }: { params: Promise<{ id:
   const today = new Date()
 
   // Group benefits by type
-  const recurringCredits = card.benefits.filter((b) => b.type === 'RECURRING_CREDIT')
-  const multipliers = card.benefits.filter((b) => b.type === 'MULTIPLIER')
+  const recurringCredits = card.benefits.filter((b: any) => b.type === 'RECURRING_CREDIT')
+  const multipliers = card.benefits.filter((b: any) => b.type === 'MULTIPLIER')
   const otherBenefits = card.benefits.filter(
-    (b) => b.type !== 'RECURRING_CREDIT' && b.type !== 'MULTIPLIER'
+    (b: any) => b.type !== 'RECURRING_CREDIT' && b.type !== 'MULTIPLIER'
   )
 
   const getBenefitIcon = (type: string) => {
@@ -58,7 +78,7 @@ export default async function CardDetailPage({ params }: { params: Promise<{ id:
     return badges[type] || 'badge-neutral'
   }
 
-  const formatBenefitValue = (benefit: typeof card.benefits[0]) => {
+  const formatBenefitValue = (benefit: any) => {
     if (!benefit.nominalValue) return 'N/A'
 
     if (benefit.currency === 'USD') {
@@ -82,7 +102,7 @@ export default async function CardDetailPage({ params }: { params: Promise<{ id:
     return labels[cycleType] || cycleType
   }
 
-  const renderBenefitCard = (benefit: typeof card.benefits[0]) => {
+  const renderBenefitCard = (benefit: any) => {
     let expiryInfo
     try {
       expiryInfo = calculateNextExpiry(
@@ -180,67 +200,70 @@ export default async function CardDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       {/* Welcome Bonuses */}
-      {card.welcomeBonuses.length > 0 && (
+      {card.welcomeBonus && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-neutral-900">Welcome Bonuses</h2>
-          {card.welcomeBonuses.map((bonus) => {
-            const progress = (bonus.currentSpend / bonus.requiredSpend) * 100
-            const daysLeft = Math.max(
-              0,
-              Math.ceil(
-                (new Date(bonus.spendWindowEnd).getTime() - today.getTime()) /
-                  (1000 * 60 * 60 * 24)
-              )
-            )
+          <h2 className="text-xl font-semibold text-neutral-900">Welcome Bonus</h2>
+          <div className="card">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="font-semibold text-neutral-900">
+                  {card.welcomeBonus.expectedPoints.toLocaleString()} {card.welcomeBonus.program}{' '}
+                  Points
+                </h3>
+                <p className="text-sm text-neutral-600">
+                  Spend ${card.welcomeBonus.requiredSpend.toLocaleString()} by{' '}
+                  {format(new Date(card.welcomeBonus.spendWindowEnd), 'MMM d, yyyy')}
+                </p>
+              </div>
+              {card.welcomeBonus.earned ? (
+                <span className="badge-success">Earned</span>
+              ) : (
+                <span className="badge-warning">In Progress</span>
+              )}
+            </div>
 
-            return (
-              <div key={bonus.id} className="card">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-neutral-900">
-                      {bonus.expectedPoints.toLocaleString()} {bonus.program} Points
-                    </h3>
-                    <p className="text-sm text-neutral-600">
-                      Spend ${bonus.requiredSpend.toLocaleString()} by{' '}
-                      {format(new Date(bonus.spendWindowEnd), 'MMM d, yyyy')}
-                    </p>
+            {!card.welcomeBonus.earned && (
+              <>
+                <div className="mb-3">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-neutral-600">Progress</span>
+                    <span className="font-medium text-neutral-900">
+                      ${card.welcomeBonus.currentSpend.toLocaleString()} / $
+                      {card.welcomeBonus.requiredSpend.toLocaleString()}
+                    </span>
                   </div>
-                  {bonus.earned ? (
-                    <span className="badge-success">Earned</span>
-                  ) : (
-                    <span className="badge-warning">In Progress</span>
-                  )}
+                  <div className="w-full bg-neutral-200 rounded-full h-2">
+                    <div
+                      className="bg-primary-600 h-2 rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          (card.welcomeBonus.currentSpend / card.welcomeBonus.requiredSpend) * 100
+                        )}%`,
+                      }}
+                    />
+                  </div>
                 </div>
 
-                {!bonus.earned && (
-                  <>
-                    <div className="mb-3">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-neutral-600">Progress</span>
-                        <span className="font-medium text-neutral-900">
-                          ${bonus.currentSpend.toLocaleString()} / $
-                          {bonus.requiredSpend.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="w-full bg-neutral-200 rounded-full h-2">
-                        <div
-                          className="bg-primary-600 h-2 rounded-full transition-all"
-                          style={{ width: `${Math.min(100, progress)}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-neutral-600">
-                        {daysLeft} days remaining • $
-                        {(bonus.requiredSpend - bonus.currentSpend).toLocaleString()} left to spend
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            )
-          })}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-neutral-600">
+                    {Math.max(
+                      0,
+                      Math.ceil(
+                        (new Date(card.welcomeBonus.spendWindowEnd).getTime() - today.getTime()) /
+                          (1000 * 60 * 60 * 24)
+                      )
+                    )}{' '}
+                    days remaining • $
+                    {(
+                      card.welcomeBonus.requiredSpend - card.welcomeBonus.currentSpend
+                    ).toLocaleString()}{' '}
+                    left to spend
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
 

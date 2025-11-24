@@ -1,6 +1,26 @@
-import type { Benefit, BenefitUsage } from '@prisma/client'
 import type { ValueAtRisk } from '@/types'
 import { calculateNextExpiry } from './expiry'
+import type { CycleType } from './cycles'
+
+// Define minimal types needed (no longer using Prisma)
+interface Benefit {
+  id: string
+  name: string
+  type: string
+  nominalValue: number | null
+  currency: string
+  cycleType: CycleType
+  cycleDefinition: string
+  usageLimitPerCycle: number | null
+}
+
+interface BenefitUsage {
+  dateUsed: string | Date
+  amountUsed: number
+  usedAmount: number
+  cycleStart: Date
+  cycleEnd: Date
+}
 
 /**
  * Calculate total value used in current cycle

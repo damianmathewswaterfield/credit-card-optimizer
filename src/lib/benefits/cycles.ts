@@ -8,8 +8,15 @@ import {
   isWithinInterval,
   parseISO,
 } from 'date-fns'
-import type { CycleType } from '@prisma/client'
 import type { CycleWindow, BenefitCycleDefinition } from '@/types'
+
+export type CycleType =
+  | 'MONTHLY'
+  | 'CALENDAR_YEAR'
+  | 'CARDMEMBER_YEAR'
+  | 'SEMIANNUAL_CALENDAR'
+  | 'ONE_TIME'
+  | 'PER_TRIP'
 
 /**
  * Parse cycle definition JSON string to typed object

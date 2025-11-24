@@ -1,11 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, WelcomeBonus } from '@prisma/client'
 import { Edit2, Save, X } from 'lucide-react'
 
-interface CardWithBonus extends Card {
-  welcomeBonuses: WelcomeBonus[]
+interface CardWithBonus {
+  id: string
+  productName: string
+  network: string
+  issuer: string
+  openDate: string | null
+  renewalMonthDay: string | null
+  welcomeBonus?: {
+    id: string
+    currentSpend: number
+    requiredSpend: number
+    spendWindowStart: string
+    spendWindowEnd: string
+    expectedPoints: number
+    program: string
+    earned: boolean
+  }
 }
 
 interface CardManagementProps {
@@ -18,50 +32,42 @@ export function CardManagement({ cards: initialCards }: CardManagementProps) {
   const [editingBonus, setEditingBonus] = useState<string | null>(null)
   const [message, setMessage] = useState('')
 
-  const handleUpdateCard = async (cardId: string, data: Partial<Card>) => {
+  const handleUpdateCard = (cardId: string, data: Partial<any>) => {
     try {
-      const response = await fetch(`/api/cards/${cardId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
+      // Save to localStorage
+      const stored = localStorage.getItem('cardOptimizer_cardData')
+      const allCardData = stored ? JSON.parse(stored) : {}
+      allCardData[cardId] = { ...allCardData[cardId], ...data }
+      localStorage.setItem('cardOptimizer_cardData', JSON.stringify(allCardData))
 
-      if (response.ok) {
-        const updated = await response.json()
-        setCards((prev) =>
-          prev.map((c) => (c.id === cardId ? { ...c, ...updated } : c))
-        )
-        setEditingCard(null)
-        setMessage('Card updated successfully!')
-        setTimeout(() => setMessage(''), 3000)
-      }
+      // Update local state
+      setCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, ...data } : c)))
+      setEditingCard(null)
+      setMessage('Card updated successfully!')
+      setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       setMessage('Failed to update card')
     }
   }
 
-  const handleUpdateBonus = async (bonusId: string, data: Partial<WelcomeBonus>) => {
+  const handleUpdateBonus = (bonusId: string, data: Partial<any>) => {
     try {
-      const response = await fetch(`/api/welcome-bonus/${bonusId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
+      // Save to localStorage
+      const stored = localStorage.getItem('cardOptimizer_welcomeBonusData')
+      const allBonusData = stored ? JSON.parse(stored) : {}
+      allBonusData[bonusId] = { ...allBonusData[bonusId], ...data }
+      localStorage.setItem('cardOptimizer_welcomeBonusData', JSON.stringify(allBonusData))
 
-      if (response.ok) {
-        const updated = await response.json()
-        setCards((prev) =>
-          prev.map((c) => ({
-            ...c,
-            welcomeBonuses: c.welcomeBonuses.map((wb) =>
-              wb.id === bonusId ? { ...wb, ...updated } : wb
-            ),
-          }))
-        )
-        setEditingBonus(null)
-        setMessage('Welcome bonus updated successfully!')
-        setTimeout(() => setMessage(''), 3000)
-      }
+      // Update local state
+      setCards((prev) =>
+        prev.map((c) => ({
+          ...c,
+          welcomeBonus: c.welcomeBonus?.id === bonusId ? { ...c.welcomeBonus, ...data } : c.welcomeBonus,
+        }))
+      )
+      setEditingBonus(null)
+      setMessage('Welcome bonus updated successfully!')
+      setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       setMessage('Failed to update welcome bonus')
     }
@@ -154,11 +160,11 @@ export function CardManagement({ cards: initialCards }: CardManagementProps) {
             </div>
           )}
 
-          {/* Welcome Bonuses */}
-          {card.welcomeBonuses.length > 0 && (
+          {/* Welcome Bonus */}
+          {card.welcomeBonus && (
             <div className="mt-6 pt-6 border-t border-neutral-200">
-              <h4 className="text-sm font-semibold text-neutral-900 mb-3">Welcome Bonuses</h4>
-              {card.welcomeBonuses.map((bonus) => (
+              <h4 className="text-sm font-semibold text-neutral-900 mb-3">Welcome Bonus</h4>
+              {[card.welcomeBonus].map((bonus) => (
                 <div key={bonus.id} className="p-4 bg-neutral-50 rounded-lg">
                   <div className="flex items-start justify-between mb-3">
                     <div>
