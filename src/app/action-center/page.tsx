@@ -172,55 +172,31 @@ export default function ActionCenterPage() {
         {expiringBenefits.length > 0 ? (
           <div className="space-y-3">
             {expiringBenefits.map((item) => {
-              const urgency =
-                item.daysUntilExpiry <= 7 ? 'critical' : item.daysUntilExpiry <= 30 ? 'high' : 'medium'
-
               return (
                 <div
                   key={`${item.card.id}-${item.benefit.id}`}
-                  className={`card ${
-                    urgency === 'critical'
-                      ? 'border-danger-300 bg-danger-50'
-                      : urgency === 'high'
-                      ? 'border-warning-300 bg-warning-50'
-                      : 'border-neutral-300'
-                  }`}
+                  className="card border-primary-200 bg-primary-50"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-neutral-900">{item.benefit.name}</h3>
-                        <span
-                          className={
-                            urgency === 'critical'
-                              ? 'badge-danger'
-                              : urgency === 'high'
-                              ? 'badge-warning'
-                              : 'badge-neutral'
-                          }
-                        >
-                          {urgency === 'critical'
-                            ? 'URGENT'
-                            : urgency === 'high'
-                            ? 'High Priority'
-                            : 'Medium Priority'}
-                        </span>
                       </div>
                       <p className="text-sm text-neutral-600 mb-3">
-                        {item.card.productName} • Expires{' '}
+                        {item.card.productName} • Renews{' '}
                         {formatDistanceToNow(item.expiryDate, { addSuffix: true })} on{' '}
                         {format(item.expiryDate, 'MMM d, yyyy')}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-danger-700">
+                      <p className="text-2xl font-bold text-primary-700">
                         ${item.valueAtRisk.toFixed(0)}{item.cycleLabel}
                       </p>
-                      <p className="text-xs text-neutral-600">expiring</p>
+                      <p className="text-xs text-neutral-600">available</p>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-neutral-200">
+                  <div className="pt-3 border-t border-primary-200">
                     <p className="text-sm font-medium text-neutral-900 mb-1">Quick Action:</p>
                     <p className="text-sm text-neutral-700">{item.benefit.triggerDescription}</p>
                   </div>
