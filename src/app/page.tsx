@@ -139,11 +139,11 @@ export default function DashboardPage() {
 
         <div className="card">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-warning-50">
-              <AlertCircle className="w-5 h-5 text-warning-600" />
+            <div className="p-2 rounded-lg bg-primary-50">
+              <TrendingUp className="w-5 h-5 text-primary-600" />
             </div>
             <div>
-              <p className="text-sm text-neutral-600">Expiring Soon</p>
+              <p className="text-sm text-neutral-600">Ready to Use</p>
               <p className="text-2xl font-bold text-neutral-900">
                 {expiringBenefits.filter((eb) => eb.daysUntilExpiry <= 30).length}
               </p>
@@ -157,17 +157,17 @@ export default function DashboardPage() {
               <Calendar className="w-5 h-5 text-primary-600" />
             </div>
             <div>
-              <p className="text-sm text-neutral-600">Upcoming Deadlines</p>
+              <p className="text-sm text-neutral-600">Opportunities</p>
               <p className="text-2xl font-bold text-neutral-900">{upcomingDeadlines}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Urgent actions */}
+      {/* Ready to claim */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-neutral-900">Top Urgent Actions</h2>
+          <h2 className="text-xl font-semibold text-neutral-900">Ready to Claim</h2>
           <Link
             href="/action-center"
             className="text-sm text-primary-600 hover:text-primary-700 font-medium"
@@ -178,48 +178,20 @@ export default function DashboardPage() {
 
         <div className="space-y-3">
           {expiringBenefits.slice(0, 3).map((item) => {
-            const urgencyLevel =
-              item.daysUntilExpiry <= 7
-                ? 'danger'
-                : item.daysUntilExpiry <= 30
-                ? 'warning'
-                : 'neutral'
-
-            const bgColor =
-              urgencyLevel === 'danger'
-                ? 'bg-danger-50 border-danger-200'
-                : urgencyLevel === 'warning'
-                ? 'bg-warning-50 border-warning-200'
-                : 'bg-neutral-50 border-neutral-200'
-
-            const textColor =
-              urgencyLevel === 'danger'
-                ? 'text-danger-900'
-                : urgencyLevel === 'warning'
-                ? 'text-warning-900'
-                : 'text-neutral-900'
-
-            const iconColor =
-              urgencyLevel === 'danger'
-                ? 'text-danger-600'
-                : urgencyLevel === 'warning'
-                ? 'text-warning-600'
-                : 'text-neutral-600'
-
             return (
               <Link
                 key={`${item.card.id}-${item.benefit.id}`}
                 href={`/benefit/${item.benefit.id}`}
-                className={`flex items-start gap-3 p-4 rounded-lg border ${bgColor} hover:opacity-90 transition-opacity`}
+                className="flex items-start gap-3 p-4 rounded-lg border bg-primary-50 border-primary-200 hover:bg-primary-100 transition-colors"
               >
-                <AlertCircle className={`w-5 h-5 ${iconColor} mt-0.5`} />
+                <TrendingUp className="w-5 h-5 text-primary-600 mt-0.5" />
                 <div className="flex-1">
-                  <p className={`font-medium ${textColor}`}>
+                  <p className="font-medium text-primary-900">
                     {item.benefit.name.replace(/\$\d+\s*(Annual|Yearly|Year)/gi, '').trim()}
                   </p>
-                  <p className={`text-sm mt-1 ${iconColor}`}>
-                    ${item.benefit.usageLimitPerCycle.toFixed(0)}{getCycleLabel(item.benefit.cycleType)} at stake •{' '}
-                    {item.card.productName} • Expires{' '}
+                  <p className="text-sm mt-1 text-primary-700">
+                    ${item.benefit.usageLimitPerCycle.toFixed(0)}{getCycleLabel(item.benefit.cycleType)} available •{' '}
+                    {item.card.productName} • Renews{' '}
                     {formatDistanceToNow(item.expiryDate, { addSuffix: true })}
                   </p>
                 </div>
@@ -242,17 +214,17 @@ export default function DashboardPage() {
               <Link
                 key={item.welcomeBonus.id}
                 href={`/cards/${item.card.id}`}
-                className="flex items-start gap-3 p-4 rounded-lg bg-warning-50 border border-warning-200 hover:opacity-90 transition-opacity"
+                className="flex items-start gap-3 p-4 rounded-lg bg-primary-50 border border-primary-200 hover:bg-primary-100 transition-colors"
               >
-                <AlertCircle className="w-5 h-5 text-warning-600 mt-0.5" />
+                <TrendingUp className="w-5 h-5 text-primary-600 mt-0.5" />
                 <div className="flex-1">
-                  <p className="font-medium text-warning-900">
-                    Welcome bonus deadline approaching
+                  <p className="font-medium text-primary-900">
+                    Welcome bonus in progress
                   </p>
-                  <p className="text-sm text-warning-700 mt-1">
-                    {item.card.productName}: ${remaining.toLocaleString()} more spend needed in{' '}
-                    {daysLeft} days to earn {item.welcomeBonus.expectedPoints.toLocaleString()}{' '}
-                    {item.welcomeBonus.program} points
+                  <p className="text-sm text-primary-700 mt-1">
+                    {item.card.productName}: ${remaining.toLocaleString()} more to earn{' '}
+                    {item.welcomeBonus.expectedPoints.toLocaleString()}{' '}
+                    {item.welcomeBonus.program} points • {daysLeft} days left
                   </p>
                 </div>
               </Link>
@@ -261,7 +233,7 @@ export default function DashboardPage() {
 
           {expiringBenefits.length === 0 && activeWelcomeBonuses.length === 0 && (
             <div className="text-center py-8 text-neutral-600">
-              <p>No urgent actions at the moment. You're all caught up!</p>
+              <p>You're all caught up! Check back soon for new opportunities.</p>
             </div>
           )}
         </div>

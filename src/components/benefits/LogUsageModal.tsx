@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Upload, Check } from 'lucide-react'
+import { X, Upload, Check, PartyPopper, Sparkles } from 'lucide-react'
 import type { Benefit, TrackingType } from '@/data/cards'
-import { addBenefitUsage, setBenefitActivation } from '@/lib/storage'
+import { addBenefitUsage, setBenefitActivation, getBenefitUsage } from '@/lib/storage'
 
 interface LogUsageModalProps {
   isOpen: boolean
@@ -32,6 +32,8 @@ export function LogUsageModal({
   const [isActivated, setIsActivated] = useState(false)
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [loggedValue, setLoggedValue] = useState('')
 
   if (!isOpen) return null
 
@@ -44,6 +46,7 @@ export function LogUsageModal({
       if (benefit.trackingType === 'BOOLEAN') {
         // Handle activation toggle
         setBenefitActivation(benefit.id, cardId, isActivated, date)
+        setLoggedValue(isActivated ? 'Activated' : 'Deactivated')
       } else if (benefit.trackingType === 'SPENDING') {
         // Handle spending entry
         const amountNum = parseFloat(amount)
@@ -59,6 +62,7 @@ export function LogUsageModal({
           merchant: merchant || undefined,
           notes: notes || undefined,
         })
+        setLoggedValue(`$${amountNum.toFixed(2)}`)
       } else if (benefit.trackingType === 'COUNTER') {
         // Handle counter entry
         const countNum = parseInt(count)
@@ -75,26 +79,33 @@ export function LogUsageModal({
           merchant: merchant || undefined,
           notes: notes || undefined,
         })
+        setLoggedValue(`${countNum}x`)
       }
 
-      setMessage('Usage logged successfully!')
-      setTimeout(() => {
-        onClose()
-        onSuccess?.()
-        // Reset form
-        setAmount('')
-        setCount('1')
-        setMerchant('')
-        setNotes('')
-        setDate(new Date().toISOString().split('T')[0])
-        setIsActivated(false)
-        setMessage('')
-      }, 1000)
+      // Show success screen
+      setShowSuccess(true)
+      onSuccess?.()
     } catch (error) {
       setMessage('Failed to log usage. Please try again.')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleClose = () => {
+    onClose()
+    // Reset form after a brief delay
+    setTimeout(() => {
+      setAmount('')
+      setCount('1')
+      setMerchant('')
+      setNotes('')
+      setDate(new Date().toISOString().split('T')[0])
+      setIsActivated(false)
+      setMessage('')
+      setShowSuccess(false)
+      setLoggedValue('')
+    }, 300)
   }
 
   const renderFormFields = () => {
@@ -264,6 +275,57 @@ export function LogUsageModal({
     }
   }
 
+  // Success screen
+  if (showSuccess) {
+    const usageData = benefit.trackingType !== 'NONE'
+      ? getBenefitUsage(benefit.id, cycleStart, cycleEnd)
+      : null
+
+    const progress = usageData && benefit.usageLimitPerCycle
+      ? Math.min(100, (usageData.totalUsed / benefit.usageLimitPerCycle) * 100)
+      : 0
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-8 text-center">
+          <div className="w-16 h-16 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Sparkles className="w-8 h-8 text-success-600" />
+          </div>
+
+          <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+            Nice! 🎉
+          </h2>
+
+          <p className="text-lg text-neutral-700 mb-4">
+            You logged <span className="font-semibold text-primary-600">{loggedValue}</span> for{' '}
+            <span className="font-semibold">{benefit.name}</span>
+          </p>
+
+          {progress > 0 && (
+            <div className="mb-6 p-4 bg-primary-50 rounded-lg border border-primary-200">
+              <p className="text-sm text-primary-900 mb-2">
+                <span className="font-semibold">{progress.toFixed(0)}%</span> used this cycle
+              </p>
+              <div className="w-full bg-primary-200 rounded-full h-2">
+                <div
+                  className="bg-primary-600 h-2 rounded-full transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={handleClose}
+            className="w-full px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -305,7 +367,7 @@ export function LogUsageModal({
           <div className="flex items-center gap-3 p-6 border-t border-neutral-200 bg-neutral-50">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
             >
               Cancel

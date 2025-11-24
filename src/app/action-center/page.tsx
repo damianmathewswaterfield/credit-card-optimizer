@@ -155,18 +155,18 @@ export default function ActionCenterPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-neutral-900">Action Center</h1>
+        <h1 className="text-3xl font-bold text-neutral-900">Opportunities</h1>
         <p className="text-neutral-600 mt-2">
-          Prioritized actions to maximize your credit card value
+          Benefits ready to use and maximize
         </p>
       </div>
 
-      {/* Section 1: Expiring Soon */}
+      {/* Section 1: Ready to Use */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 text-danger-600" />
-          <h2 className="text-xl font-semibold text-neutral-900">Expiring Soon</h2>
-          <span className="badge-danger">{expiringBenefits.length}</span>
+          <TrendingUp className="w-5 h-5 text-primary-600" />
+          <h2 className="text-xl font-semibold text-neutral-900">Ready to Use</h2>
+          <span className="badge-primary">{expiringBenefits.length}</span>
         </div>
 
         {expiringBenefits.length > 0 ? (
@@ -239,7 +239,7 @@ export default function ActionCenterPage() {
           <div className="card text-center py-8">
             <CheckCircle className="w-8 h-8 text-success-600 mx-auto mb-2" />
             <p className="text-neutral-600">
-              No credits expiring in the next 60 days. You're all set!
+              You're all caught up! Check back soon.
             </p>
           </div>
         )}
