@@ -5,7 +5,7 @@ import { AlertCircle, TrendingDown, CheckCircle } from 'lucide-react'
 import { calculateNextExpiry } from '@/lib/benefits/expiry'
 import { format, formatDistanceToNow } from 'date-fns'
 import { CARDS } from '@/data/cards'
-import { enrichCardWithUserData, type EnrichedCard } from '@/lib/storage'
+import { enrichCardWithUserData, getBenefitUsage, type EnrichedCard } from '@/lib/storage'
 import { useState, useEffect } from 'react'
 
 export default function ActionCenterPage() {
@@ -40,6 +40,27 @@ export default function ActionCenterPage() {
     return labels[cycleType] || ''
   }
 
+  // Helper to get cycle dates
+  const getCycleDates = (cycleType: string, card: EnrichedCard) => {
+    const year = today.getFullYear()
+    const month = today.getMonth()
+
+    switch (cycleType) {
+      case 'MONTHLY':
+        return {
+          start: new Date(year, month, 1).toISOString().split('T')[0],
+          end: new Date(year, month + 1, 0).toISOString().split('T')[0],
+        }
+      case 'CALENDAR_YEAR':
+        return {
+          start: `${year}-01-01`,
+          end: `${year}-12-31`,
+        }
+      default:
+        return { start: `${year}-01-01`, end: `${year}-12-31` }
+    }
+  }
+
   // Section 1: Expiring Soon
   const expiringBenefits: Array<{
     benefit: any
@@ -62,14 +83,22 @@ export default function ActionCenterPage() {
           )
 
           if (expiryInfo.daysUntilExpiry <= 60) {
-            expiringBenefits.push({
-              benefit,
-              card,
-              daysUntilExpiry: expiryInfo.daysUntilExpiry,
-              expiryDate: expiryInfo.nextExpiryDate,
-              valueAtRisk: benefit.usageLimitPerCycle,
-              cycleLabel: getCycleLabel(benefit.cycleType),
-            })
+            // Check if benefit has been fully used
+            const cycleDates = getCycleDates(benefit.cycleType, card)
+            const usageData = getBenefitUsage(benefit.id, cycleDates.start, cycleDates.end)
+            const hasRemainingValue = !usageData || usageData.totalUsed < benefit.usageLimitPerCycle
+
+            // Only show if there's remaining value to lose
+            if (hasRemainingValue) {
+              expiringBenefits.push({
+                benefit,
+                card,
+                daysUntilExpiry: expiryInfo.daysUntilExpiry,
+                expiryDate: expiryInfo.nextExpiryDate,
+                valueAtRisk: benefit.usageLimitPerCycle,
+                cycleLabel: getCycleLabel(benefit.cycleType),
+              })
+            }
           }
         } catch (e) {
           // Skip

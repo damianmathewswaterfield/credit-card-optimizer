@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { calculateNextExpiry, isExpiringSoon } from '@/lib/benefits/expiry'
 import { formatDistanceToNow } from 'date-fns'
 import { CARDS } from '@/data/cards'
-import { enrichCardWithUserData, type EnrichedCard } from '@/lib/storage'
+import { enrichCardWithUserData, getBenefitUsage, type EnrichedCard } from '@/lib/storage'
 import { useState, useEffect } from 'react'
 
 export default function DashboardPage() {
@@ -41,6 +41,27 @@ export default function DashboardPage() {
     return labels[cycleType] || ''
   }
 
+  // Helper to get cycle dates
+  const getCycleDates = (cycleType: string, card: EnrichedCard) => {
+    const year = today.getFullYear()
+    const month = today.getMonth()
+
+    switch (cycleType) {
+      case 'MONTHLY':
+        return {
+          start: new Date(year, month, 1).toISOString().split('T')[0],
+          end: new Date(year, month + 1, 0).toISOString().split('T')[0],
+        }
+      case 'CALENDAR_YEAR':
+        return {
+          start: `${year}-01-01`,
+          end: `${year}-12-31`,
+        }
+      default:
+        return { start: `${year}-01-01`, end: `${year}-12-31` }
+    }
+  }
+
   // Calculate expiring benefits
   const expiringBenefits: Array<{
     benefit: any
@@ -61,12 +82,20 @@ export default function DashboardPage() {
           )
 
           if (isExpiringSoon(expiryInfo, 60)) {
-            expiringBenefits.push({
-              benefit,
-              card,
-              daysUntilExpiry: expiryInfo.daysUntilExpiry,
-              expiryDate: expiryInfo.nextExpiryDate,
-            })
+            // Check if benefit has been fully used
+            const cycleDates = getCycleDates(benefit.cycleType, card)
+            const usageData = getBenefitUsage(benefit.id, cycleDates.start, cycleDates.end)
+            const hasRemainingValue = !usageData || usageData.totalUsed < benefit.usageLimitPerCycle
+
+            // Only show if there's remaining value to lose
+            if (hasRemainingValue) {
+              expiringBenefits.push({
+                benefit,
+                card,
+                daysUntilExpiry: expiryInfo.daysUntilExpiry,
+                expiryDate: expiryInfo.nextExpiryDate,
+              })
+            }
           }
         } catch (e) {
           // Skip benefits with calculation errors
