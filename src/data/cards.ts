@@ -409,14 +409,5 @@ export const CARDS: Card[] = [
         active: true,
       },
     ],
-    welcomeBonus: {
-      id: 'venture-wb',
-      requiredSpend: 10000,
-      spendWindowStart: '2024-08-01',
-      spendWindowEnd: '2025-02-01',
-      earned: false,
-      expectedPoints: 100000,
-      program: 'VENTURE',
-    },
   },
 ]
