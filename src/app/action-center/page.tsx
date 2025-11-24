@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { AlertCircle, TrendingDown, CheckCircle } from 'lucide-react'
+import { TrendingUp, TrendingDown, CheckCircle } from 'lucide-react'
 import { calculateNextExpiry } from '@/lib/benefits/expiry'
 import { format, formatDistanceToNow } from 'date-fns'
 import { CARDS } from '@/data/cards'

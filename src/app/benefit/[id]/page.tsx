@@ -292,8 +292,8 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
           </h2>
           <div className="space-y-2">
             {usageData.usages
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-              .map((usage) => (
+              .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .map((usage: any) => (
                 <div
                   key={usage.id}
                   className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg border border-neutral-200"
