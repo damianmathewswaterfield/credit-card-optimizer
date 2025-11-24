@@ -7,6 +7,7 @@ import { ArrowLeft, Plus, Calendar, DollarSign, CheckCircle, AlertCircle } from 
 import { CARDS } from '@/data/cards'
 import { enrichCardWithUserData, getBenefitUsage, getAllBenefitUsage, addBenefitUsage, setBenefitActivation } from '@/lib/storage'
 import { getBenefitIcon } from '@/lib/benefitIcons'
+import { Toast } from '@/components/ui/Toast'
 import type { Benefit } from '@/data/cards'
 
 export default function BenefitPage({ params }: { params: Promise<{ id: string }> }) {
@@ -16,8 +17,9 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
   const [loading, setLoading] = useState(true)
   const [quickLogAmount, setQuickLogAmount] = useState('')
   const [isLogging, setIsLogging] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null)
+  const [usageData, setUsageData] = useState<any>(null)
+  const [allUsageData, setAllUsageData] = useState<any>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -40,7 +42,24 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
       }
       setLoading(false)
     })
-  }, [params, refreshKey])
+  }, [params])
+
+  // Load usage data
+  const loadUsageData = () => {
+    if (!benefit || !card) return
+
+    const cycleDates = getCycleDates()
+    if (benefit.trackingType !== 'NONE') {
+      setUsageData(getBenefitUsage(benefit.id, cycleDates.start, cycleDates.end))
+    }
+    if (benefit.trackingType === 'BOOLEAN') {
+      setAllUsageData(getAllBenefitUsage().find((u) => u.benefitId === benefit.id))
+    }
+  }
+
+  useEffect(() => {
+    loadUsageData()
+  }, [benefit, card])
 
   if (loading) {
     return (
@@ -77,12 +96,6 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
   }
 
   const cycleDates = getCycleDates()
-  const usageData = benefit.trackingType !== 'NONE'
-    ? getBenefitUsage(benefit.id, cycleDates.start, cycleDates.end)
-    : null
-  const allUsage = benefit.trackingType === 'BOOLEAN'
-    ? getAllBenefitUsage().find((u) => u.benefitId === benefit.id)
-    : null
 
   const getProgress = () => {
     if (!usageData || !benefit.usageLimitPerCycle) return 0
@@ -94,12 +107,11 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
   const handleQuickLog = async () => {
     if (isLogging) return
     setIsLogging(true)
-    setSuccessMessage('')
 
     try {
       const amount = parseFloat(quickLogAmount)
       if (isNaN(amount) || amount <= 0) {
-        alert('Please enter a valid amount')
+        setToast({ message: 'Please enter a valid amount', type: 'error' })
         setIsLogging(false)
         return
       }
@@ -109,26 +121,26 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
         amount,
       })
 
-      setSuccessMessage(`Successfully logged $${amount.toFixed(2)}!`)
-      setRefreshKey((prev) => prev + 1)
-      setTimeout(() => setSuccessMessage(''), 3000)
+      setToast({ message: `Successfully logged $${amount.toFixed(2)}!`, type: 'success' })
+      loadUsageData()
     } catch (error) {
-      alert('Failed to log usage. Please try again.')
+      setToast({ message: 'Failed to log usage. Please try again.', type: 'error' })
     } finally {
       setIsLogging(false)
     }
   }
 
   const handleToggleActivation = async () => {
-    const newStatus = !allUsage?.activated
+    const newStatus = !allUsageData?.activated
     setBenefitActivation(benefit.id, card.id, newStatus, new Date().toISOString())
-    setSuccessMessage(`Benefit ${newStatus ? 'activated' : 'deactivated'}!`)
-    setRefreshKey((prev) => prev + 1)
-    setTimeout(() => setSuccessMessage(''), 3000)
+    setToast({ message: `Benefit ${newStatus ? 'activated' : 'deactivated'}!`, type: 'success' })
+    loadUsageData()
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
       {/* Back Button */}
       <Link
         href={`/cards/${card.id}`}
@@ -198,23 +210,23 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
           <button
             onClick={handleToggleActivation}
             className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
-              allUsage?.activated
+              allUsageData?.activated
                 ? 'border-success-500 bg-success-50'
                 : 'border-neutral-300 bg-white hover:border-primary-500'
             }`}
           >
-            <span className={`font-semibold ${allUsage?.activated ? 'text-success-900' : 'text-neutral-700'}`}>
-              {allUsage?.activated ? 'Activated' : 'Not Activated'}
+            <span className={`font-semibold ${allUsageData?.activated ? 'text-success-900' : 'text-neutral-700'}`}>
+              {allUsageData?.activated ? 'Activated' : 'Not Activated'}
             </span>
-            {allUsage?.activated ? (
+            {allUsageData?.activated ? (
               <CheckCircle className="w-6 h-6 text-success-600" />
             ) : (
               <AlertCircle className="w-6 h-6 text-neutral-400" />
             )}
           </button>
-          {allUsage?.activationDate && (
+          {allUsageData?.activationDate && (
             <p className="text-sm text-neutral-600 mt-2">
-              Activated on {new Date(allUsage.activationDate).toLocaleDateString()}
+              Activated on {new Date(allUsageData.activationDate).toLocaleDateString()}
             </p>
           )}
         </div>
@@ -246,16 +258,6 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
               <Plus className="w-5 h-5" />
               {isLogging ? 'Logging...' : 'Log Usage'}
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* Success Message */}
-      {successMessage && (
-        <div className="card bg-success-50 border-success-200">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-success-600" />
-            <p className="text-success-900 font-medium">{successMessage}</p>
           </div>
         </div>
       )}

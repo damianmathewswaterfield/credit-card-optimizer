@@ -440,6 +440,44 @@ export function setBenefitActivation(
   }
 }
 
+export function updateBenefitUsageEntry(
+  benefitId: string,
+  entryId: string,
+  updates: Partial<Omit<BenefitUsageEntry, 'id'>>
+): void {
+  if (!isBrowser) return
+
+  try {
+    const allUsage = getAllBenefitUsage()
+
+    allUsage.forEach((usageRecord) => {
+      if (usageRecord.benefitId === benefitId) {
+        const entryIndex = usageRecord.usages.findIndex((e) => e.id === entryId)
+        if (entryIndex !== -1) {
+          const oldEntry = usageRecord.usages[entryIndex]
+          const oldAmount = oldEntry.amount || 0
+
+          // Update the entry
+          usageRecord.usages[entryIndex] = {
+            ...oldEntry,
+            ...updates,
+          }
+
+          // Recalculate totalUsed if amount changed
+          if (updates.amount !== undefined) {
+            usageRecord.totalUsed = usageRecord.totalUsed - oldAmount + updates.amount
+          }
+        }
+      }
+    })
+
+    localStorage.setItem(STORAGE_KEYS.BENEFIT_USAGE, JSON.stringify(allUsage))
+  } catch (error) {
+    console.error('Failed to update benefit usage entry:', error)
+    throw error
+  }
+}
+
 export function deleteBenefitUsageEntry(benefitId: string, entryId: string): void {
   if (!isBrowser) return
 
