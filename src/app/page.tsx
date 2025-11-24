@@ -1,11 +1,11 @@
 'use client'
 
-import { CreditCard, Calendar, AlertCircle, TrendingUp } from 'lucide-react'
+import { CreditCard, Calendar, AlertCircle, TrendingUp, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { calculateNextExpiry, isExpiringSoon } from '@/lib/benefits/expiry'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow, format } from 'date-fns'
 import { CARDS } from '@/data/cards'
-import { enrichCardWithUserData, getBenefitUsage, type EnrichedCard } from '@/lib/storage'
+import { enrichCardWithUserData, getBenefitUsage, getAllBenefitUsage, type EnrichedCard } from '@/lib/storage'
 import { useState, useEffect } from 'react'
 
 export default function DashboardPage() {
@@ -266,6 +266,70 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Recent Activity */}
+      {(() => {
+        const allUsage = getAllBenefitUsage()
+        const recentEntries: Array<{
+          entry: any
+          benefit: any
+          card: any
+        }> = []
+
+        for (const usage of allUsage) {
+          const card = cards.find((c) => c.id === usage.cardId)
+          if (!card) continue
+          const benefit = card.benefits.find((b: any) => b.id === usage.benefitId)
+          if (!benefit) continue
+
+          for (const entry of usage.usages) {
+            recentEntries.push({ entry, benefit, card })
+          }
+        }
+
+        recentEntries.sort(
+          (a, b) => new Date(b.entry.date).getTime() - new Date(a.entry.date).getTime()
+        )
+
+        return recentEntries.length > 0 ? (
+          <div className="card">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary-600" />
+                <h2 className="text-xl font-semibold text-neutral-900">Recent Activity</h2>
+              </div>
+              <Link
+                href="/usage-history"
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              >
+                View all →
+              </Link>
+            </div>
+
+            <div className="space-y-2">
+              {recentEntries.slice(0, 5).map((item) => (
+                <div
+                  key={item.entry.id}
+                  className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium text-neutral-900">
+                      {item.benefit.name.replace(/\$\d+\s*(Annual|Yearly|Year)/gi, '').trim()}
+                    </p>
+                    <p className="text-sm text-neutral-600">{item.card.productName}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-neutral-900">${item.entry.amount.toFixed(2)}</p>
+                    <p className="text-xs text-neutral-600">
+                      {format(new Date(item.entry.date), 'MMM d')}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null
+      })()}
 
       {/* Quick links */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

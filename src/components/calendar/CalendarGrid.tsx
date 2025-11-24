@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, AlertCircle, RefreshCw, Clock, PartyPopper } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
 import {
@@ -60,16 +60,16 @@ export function CalendarGrid({ events, onEventClick }: CalendarGridProps) {
     }
   }
 
-  const getEventIcon = (type: CalendarEvent['type']) => {
+  const getEventIconComponent = (type: CalendarEvent['type']) => {
     switch (type) {
       case 'expiring':
-        return '⚠️'
+        return AlertCircle
       case 'reset':
-        return '🔄'
+        return RefreshCw
       case 'deadline':
-        return '⏰'
+        return Clock
       case 'anniversary':
-        return '🎉'
+        return PartyPopper
     }
   }
 
@@ -165,19 +165,22 @@ export function CalendarGrid({ events, onEventClick }: CalendarGridProps) {
                 </div>
 
                 <div className="space-y-1">
-                  {dayEvents.slice(0, 3).map((event) => (
-                    <Link
-                      key={event.id}
-                      href={event.benefitId ? `/benefit/${event.benefitId}` : `/cards/${event.cardId}`}
-                      className={`block w-full text-left px-2 py-1 rounded text-xs font-medium text-white truncate transition-colors ${getEventColor(
-                        event.type
-                      )}`}
-                      title={`${event.title} - ${event.cardName}`}
-                    >
-                      <span className="mr-1">{getEventIcon(event.type)}</span>
-                      {event.title}
-                    </Link>
-                  ))}
+                  {dayEvents.slice(0, 3).map((event) => {
+                    const EventIcon = getEventIconComponent(event.type)
+                    return (
+                      <Link
+                        key={event.id}
+                        href={event.benefitId ? `/benefit/${event.benefitId}` : `/cards/${event.cardId}`}
+                        className={`flex items-center gap-1 w-full text-left px-2 py-1 rounded text-xs font-medium text-white truncate transition-colors ${getEventColor(
+                          event.type
+                        )}`}
+                        title={`${event.title} - ${event.cardName}`}
+                      >
+                        <EventIcon className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{event.title}</span>
+                      </Link>
+                    )
+                  })}
                   {dayEvents.length > 3 && (
                     <div className="text-xs text-neutral-600 px-2">
                       +{dayEvents.length - 3} more

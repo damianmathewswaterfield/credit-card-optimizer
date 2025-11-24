@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, DollarSign, CreditCard, Award, ChevronDown, ChevronUp } from 'lucide-react'
+import { TrendingUp, DollarSign, CreditCard, Award, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 import { CARDS } from '@/data/cards'
 import { enrichCardWithUserData } from '@/lib/storage'
 import {
@@ -15,14 +15,35 @@ export default function ValuePage() {
   const [loading, setLoading] = useState(true)
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'value' | 'roi' | 'name'>('value')
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  useEffect(() => {
+  const loadValues = () => {
     const enrichedCards = CARDS.map(enrichCardWithUserData)
     const cycleDates = getCurrentYearCycleDates()
     const values = calculateAllCardsValue(enrichedCards, cycleDates.start, cycleDates.end)
     setCardValues(values)
     setLoading(false)
+    setIsRefreshing(false)
+  }
+
+  useEffect(() => {
+    loadValues()
+
+    // Reload data when window gains focus
+    const handleFocus = () => {
+      loadValues()
+    }
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [])
+
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    loadValues()
+  }
 
   if (loading) {
     return (
@@ -66,11 +87,21 @@ export default function ValuePage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-neutral-900">Value Analytics</h1>
-        <p className="text-neutral-600 mt-2">
-          Track the total value you're extracting from your credit cards
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-neutral-900">Value Analytics</h1>
+          <p className="text-neutral-600 mt-2">
+            Track the total value you're extracting from your credit cards
+          </p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
       </div>
 
       {/* Portfolio Summary */}

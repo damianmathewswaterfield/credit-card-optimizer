@@ -33,8 +33,14 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
         if (foundBenefit) {
           setBenefit(foundBenefit)
           setCard(enrichedCard)
-          // Set default quick log amount to the cycle limit
-          if (foundBenefit.usageLimitPerCycle) {
+
+          // Try to load last logged amount from localStorage, fallback to cycle limit
+          const lastAmountKey = `lastLoggedAmount_${p.id}`
+          const lastAmount = localStorage.getItem(lastAmountKey)
+
+          if (lastAmount) {
+            setQuickLogAmount(lastAmount)
+          } else if (foundBenefit.usageLimitPerCycle) {
             setQuickLogAmount(foundBenefit.usageLimitPerCycle.toString())
           }
           break
@@ -121,6 +127,9 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
         amount,
       })
 
+      // Remember this amount for next time
+      localStorage.setItem(`lastLoggedAmount_${benefit.id}`, amount.toString())
+
       setToast({ message: `Successfully logged $${amount.toFixed(2)}!`, type: 'success' })
       loadUsageData()
     } catch (error) {
@@ -184,20 +193,33 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-neutral-600">Used this cycle</span>
-              <span className="text-2xl font-bold text-neutral-900">
-                ${usageData?.totalUsed.toFixed(2) || '0.00'}
-              </span>
+              <div className="text-right">
+                <span className="text-2xl font-bold text-neutral-900">
+                  ${usageData?.totalUsed.toFixed(2) || '0.00'}
+                </span>
+                <span className="text-lg font-medium text-neutral-600 ml-2">
+                  ({getProgress().toFixed(0)}%)
+                </span>
+              </div>
             </div>
-            <div className="w-full bg-neutral-200 rounded-full h-3">
+            <div className="relative w-full bg-neutral-200 rounded-full h-4">
               <div
-                className="bg-primary-600 h-3 rounded-full transition-all"
-                style={{ width: `${getProgress()}%` }}
-              />
+                className={`h-4 rounded-full transition-all flex items-center justify-center text-xs font-medium text-white ${
+                  getProgress() >= 100 ? 'bg-success-600' : 'bg-primary-600'
+                }`}
+                style={{ width: `${Math.min(100, getProgress())}%` }}
+              >
+                {getProgress() >= 15 && `${getProgress().toFixed(0)}%`}
+              </div>
             </div>
-            <div className="flex justify-between text-sm text-neutral-600">
-              <span>${(usageData?.totalUsed || 0).toFixed(2)} used</span>
-              <span>
-                ${(benefit.usageLimitPerCycle - (usageData?.totalUsed || 0)).toFixed(2)} remaining
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-600">${(usageData?.totalUsed || 0).toFixed(2)} used</span>
+              <span className={`font-medium ${
+                benefit.usageLimitPerCycle - (usageData?.totalUsed || 0) <= 0
+                  ? 'text-success-600'
+                  : 'text-neutral-900'
+              }`}>
+                ${Math.max(0, benefit.usageLimitPerCycle - (usageData?.totalUsed || 0)).toFixed(2)} remaining
               </span>
             </div>
           </div>

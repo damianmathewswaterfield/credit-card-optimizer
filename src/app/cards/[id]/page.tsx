@@ -2,7 +2,7 @@
 
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Search } from 'lucide-react'
 import { format } from 'date-fns'
 import { CARDS } from '@/data/cards'
 import { enrichCardWithUserData } from '@/lib/storage'
@@ -14,6 +14,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
   const [loading, setLoading] = useState(true)
   const [resolvedId, setResolvedId] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     params.then((p) => {
@@ -83,10 +84,16 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
 
   const today = new Date()
 
+  // Filter benefits by search query
+  const filteredBenefits = card.benefits.filter((b: any) =>
+    b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    b.triggerDescription?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   // Group benefits by type
-  const recurringCredits = card.benefits.filter((b: any) => b.type === 'RECURRING_CREDIT')
-  const multipliers = card.benefits.filter((b: any) => b.type === 'MULTIPLIER')
-  const otherBenefits = card.benefits.filter(
+  const recurringCredits = filteredBenefits.filter((b: any) => b.type === 'RECURRING_CREDIT')
+  const multipliers = filteredBenefits.filter((b: any) => b.type === 'MULTIPLIER')
+  const otherBenefits = filteredBenefits.filter(
     (b: any) => b.type !== 'RECURRING_CREDIT' && b.type !== 'MULTIPLIER'
   )
 
@@ -107,6 +114,20 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
           {card.network} • {card.issuer} • Annual Fee: ${card.annualFee.toFixed(0)}
         </p>
       </div>
+
+      {/* Search Benefits */}
+      {card.benefits.length > 5 && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search benefits..."
+            className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+      )}
 
       {/* Welcome Bonuses */}
       {card.welcomeBonus && (

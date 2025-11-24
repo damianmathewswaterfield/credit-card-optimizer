@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { History, Edit, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { History, Edit, Trash2, ChevronDown, ChevronUp, Download } from 'lucide-react'
 import { format } from 'date-fns'
 import { CARDS } from '@/data/cards'
 import {
@@ -163,6 +163,37 @@ export default function UsageHistoryPage() {
     }
   }
 
+  const handleExport = () => {
+    // Create CSV content
+    const headers = ['Date', 'Benefit', 'Card', 'Amount', 'Notes']
+    const csvRows = [headers.join(',')]
+
+    sortedRows.forEach((row) => {
+      const csvRow = [
+        row.entry.date,
+        `"${row.benefitName.replace(/"/g, '""')}"`,
+        `"${row.cardName.replace(/"/g, '""')}"`,
+        row.entry.amount.toFixed(2),
+        row.entry.notes ? `"${row.entry.notes.replace(/"/g, '""')}"` : '',
+      ]
+      csvRows.push(csvRow.join(','))
+    })
+
+    const csvContent = csvRows.join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+
+    link.setAttribute('href', url)
+    link.setAttribute('download', `usage-history-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    setToast({ message: 'Exported to CSV successfully', type: 'success' })
+  }
+
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return null
     return sortOrder === 'asc' ? (
@@ -184,12 +215,23 @@ export default function UsageHistoryPage() {
     <div className="space-y-6">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <History className="w-6 h-6 text-primary-600" />
-          <h1 className="text-3xl font-bold text-neutral-900">Usage History</h1>
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <History className="w-6 h-6 text-primary-600" />
+            <h1 className="text-3xl font-bold text-neutral-900">Usage History</h1>
+          </div>
+          <p className="text-neutral-600">View and manage all your logged benefit usage</p>
         </div>
-        <p className="text-neutral-600">View and manage all your logged benefit usage</p>
+        {sortedRows.length > 0 && (
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+        )}
       </div>
 
       {/* Filters */}
