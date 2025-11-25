@@ -177,8 +177,9 @@ export default function ValuePage() {
       </div>
 
       {/* Card Value Breakdown */}
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-neutral-900">Card Breakdown</h2>
+      <div>
+        <h2 className="text-xl font-semibold text-neutral-900 mb-2">Card Breakdown</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {sortedCards.map((cardValue) => (
           <div key={cardValue.cardId} className={`card border ${getROIBgColor(cardValue.roi)}`}>
             <div className="flex items-start justify-between mb-4">
@@ -277,6 +278,7 @@ export default function ValuePage() {
             )}
           </div>
         ))}
+        </div>
       </div>
 
       {/* Empty State */}

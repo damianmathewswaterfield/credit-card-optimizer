@@ -223,7 +223,7 @@ export default function DealsPage() {
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">Filter by Card</label>
             <select
@@ -284,7 +284,7 @@ export default function DealsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredDeals.map((deal) => {
             const expired = isExpired(deal.validTo)
             const expiringSoon = !expired && isExpiringSoon(deal.validTo)
