@@ -98,7 +98,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
   )
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       {/* Header */}
       <div>
         <Link
@@ -131,7 +131,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* Welcome Bonuses */}
       {card.welcomeBonus && (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <h2 className="text-xl font-semibold text-neutral-900">Welcome Bonus</h2>
           <div className="card">
             <div className="flex items-start justify-between mb-4">
@@ -199,7 +199,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* Recurring Credits */}
       {recurringCredits.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <h2 className="text-xl font-semibold text-neutral-900">Recurring Credits</h2>
           <div className="grid grid-cols-1 gap-4">
             {recurringCredits.map((benefit: any) => {
@@ -221,7 +221,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* Multipliers */}
       {multipliers.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <h2 className="text-xl font-semibold text-neutral-900">Earning Multipliers</h2>
           <div className="grid grid-cols-1 gap-4">
             {multipliers.map((benefit: any) => {
@@ -243,7 +243,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* Other Benefits */}
       {otherBenefits.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <h2 className="text-xl font-semibold text-neutral-900">Other Benefits</h2>
           <div className="grid grid-cols-1 gap-4">
             {otherBenefits.map((benefit: any) => {

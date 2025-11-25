@@ -153,7 +153,7 @@ export default function ActionCenterPage() {
   )
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       <div>
         <h1 className="text-3xl font-bold text-neutral-900">Opportunities</h1>
         <p className="text-neutral-600 mt-2">
@@ -162,7 +162,7 @@ export default function ActionCenterPage() {
       </div>
 
       {/* Section 1: Ready to Use */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-primary-600" />
           <h2 className="text-xl font-semibold text-neutral-900">Ready to Use</h2>
@@ -212,7 +212,7 @@ export default function ActionCenterPage() {
             })}
           </div>
         ) : (
-          <div className="card text-center py-8">
+          <div className="card text-center py-3">
             <CheckCircle className="w-8 h-8 text-success-600 mx-auto mb-2" />
             <p className="text-neutral-600">
               You're all caught up! Check back soon.
@@ -222,7 +222,7 @@ export default function ActionCenterPage() {
       </div>
 
       {/* Section 2: Incomplete Welcome Bonuses */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="flex items-center gap-2">
           <TrendingDown className="w-5 h-5 text-warning-600" />
           <h2 className="text-xl font-semibold text-neutral-900">Welcome Bonus Progress</h2>
@@ -297,7 +297,7 @@ export default function ActionCenterPage() {
             ))}
           </div>
         ) : (
-          <div className="card text-center py-8">
+          <div className="card text-center py-3">
             <CheckCircle className="w-8 h-8 text-success-600 mx-auto mb-2" />
             <p className="text-neutral-600">
               No active welcome bonuses. All bonuses have been earned!
@@ -308,7 +308,7 @@ export default function ActionCenterPage() {
 
       {/* Section 3: Monthly Credits Reminder */}
       {monthlyCredits.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-primary-600" />
             <h2 className="text-xl font-semibold text-neutral-900">Monthly Credits</h2>

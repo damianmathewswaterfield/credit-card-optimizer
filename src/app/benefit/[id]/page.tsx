@@ -147,7 +147,7 @@ export default function BenefitPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-2">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       {/* Back Button */}

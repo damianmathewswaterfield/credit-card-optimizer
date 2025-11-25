@@ -112,7 +112,7 @@ export function LogUsageModal({
     switch (benefit.trackingType) {
       case 'BOOLEAN':
         return (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Activation Status
@@ -149,7 +149,7 @@ export function LogUsageModal({
 
       case 'SPENDING':
         return (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Amount Spent ($) <span className="text-danger-500">*</span>
@@ -206,7 +206,7 @@ export function LogUsageModal({
 
       case 'COUNTER':
         return (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Count <span className="text-danger-500">*</span>
@@ -268,7 +268,7 @@ export function LogUsageModal({
 
       default:
         return (
-          <div className="text-center py-8 text-neutral-600">
+          <div className="text-center py-3 text-neutral-600">
             This benefit does not require usage tracking.
           </div>
         )
@@ -302,7 +302,7 @@ export function LogUsageModal({
           </p>
 
           {progress > 0 && (
-            <div className="mb-6 p-4 bg-primary-50 rounded-lg border border-primary-200">
+            <div className="mb-2 p-4 bg-primary-50 rounded-lg border border-primary-200">
               <p className="text-sm text-primary-900 mb-2">
                 <span className="font-semibold">{progress.toFixed(0)}%</span> used this cycle
               </p>

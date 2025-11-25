@@ -25,7 +25,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       <div>
         <h1 className="text-3xl font-bold text-neutral-900">Settings</h1>
         <p className="text-neutral-600 mt-2">
@@ -35,14 +35,14 @@ export default function SettingsPage() {
 
       {/* User Preferences */}
       <div className="card">
-        <h2 className="text-xl font-semibold text-neutral-900 mb-6">User Preferences</h2>
+        <h2 className="text-xl font-semibold text-neutral-900 mb-2">User Preferences</h2>
         <UserPreferencesForm />
       </div>
 
       {/* Card Management */}
       <div className="card">
-        <h2 className="text-xl font-semibold text-neutral-900 mb-6">Card Management</h2>
-        <p className="text-sm text-neutral-600 mb-6">
+        <h2 className="text-xl font-semibold text-neutral-900 mb-2">Card Management</h2>
+        <p className="text-sm text-neutral-600 mb-2">
           Update card open dates, renewal dates, and welcome bonus progress. This ensures accurate
           benefit cycle calculations.
         </p>

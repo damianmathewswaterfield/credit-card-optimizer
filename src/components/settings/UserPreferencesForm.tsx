@@ -58,7 +58,7 @@ export function UserPreferencesForm({ initialData }: UserPreferencesFormProps = 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Timezone */}
       <div>
         <label className="block text-sm font-medium text-neutral-700 mb-2">Timezone</label>

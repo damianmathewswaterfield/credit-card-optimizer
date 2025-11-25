@@ -192,7 +192,7 @@ export default function DealsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -209,7 +209,7 @@ export default function DealsPage() {
       </div>
 
       {/* Filters and Search */}
-      <div className="card space-y-4">
+      <div className="card space-y-2">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -398,7 +398,7 @@ export default function DealsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-2">
               {/* Card */}
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-1">

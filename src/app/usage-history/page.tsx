@@ -212,7 +212,7 @@ export default function UsageHistoryPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <div className="flex items-start justify-between">

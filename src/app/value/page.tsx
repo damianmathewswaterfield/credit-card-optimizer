@@ -85,7 +85,7 @@ export default function ValuePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -193,7 +193,7 @@ export default function ValuePage() {
       </div>
 
       {/* Card Value Breakdown */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         <h2 className="text-xl font-semibold text-neutral-900">Card Breakdown</h2>
         {sortedCards.map((cardValue) => (
           <div key={cardValue.cardId} className={`card border ${getROIBgColor(cardValue.roi)}`}>

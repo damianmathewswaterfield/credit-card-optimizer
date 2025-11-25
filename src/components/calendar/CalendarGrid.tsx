@@ -74,7 +74,7 @@ export function CalendarGrid({ events, onEventClick }: CalendarGridProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Calendar Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-neutral-900">

@@ -25,7 +25,7 @@ export default function CardsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       <div>
         <h1 className="text-3xl font-bold text-neutral-900">My Cards</h1>
         <p className="text-neutral-600 mt-2">
@@ -33,7 +33,7 @@ export default function CardsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {cards.map((card) => {
           return (
             <Link key={card.id} href={`/cards/${card.id}`} className="card-hover group">

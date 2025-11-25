@@ -74,7 +74,7 @@ export function CardManagement({ cards: initialCards }: CardManagementProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {message && (
         <div
           className={`p-4 rounded-lg ${
@@ -109,7 +109,7 @@ export function CardManagement({ cards: initialCards }: CardManagementProps) {
           </div>
 
           {editingCard === card.id ? (
-            <div className="space-y-4 pt-4 border-t border-neutral-200">
+            <div className="space-y-2 pt-4 border-t border-neutral-200">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-neutral-700 mb-1">

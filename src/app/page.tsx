@@ -117,7 +117,7 @@ export default function DashboardPage() {
     expiringBenefits.filter((eb) => eb.daysUntilExpiry <= 30).length + activeWelcomeBonuses.length
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       <div>
         <h1 className="text-3xl font-bold text-neutral-900">Dashboard</h1>
         <p className="text-neutral-600 mt-2">Your credit card benefits overview</p>
@@ -232,7 +232,7 @@ export default function DashboardPage() {
           })}
 
           {expiringBenefits.length === 0 && activeWelcomeBonuses.length === 0 && (
-            <div className="text-center py-8 text-neutral-600">
+            <div className="text-center py-3 text-neutral-600">
               <p>You're all caught up! Check back soon for new opportunities.</p>
             </div>
           )}
