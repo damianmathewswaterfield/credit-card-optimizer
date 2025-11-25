@@ -170,44 +170,28 @@ export default function ActionCenterPage() {
         </div>
 
         {expiringBenefits.length > 0 ? (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {expiringBenefits.map((item) => {
               return (
-                <div
+                <Link
                   key={`${item.card.id}-${item.benefit.id}`}
-                  className="card border-primary-200 bg-primary-50"
+                  href={`/benefit/${item.benefit.id}`}
+                  className="card border-primary-200 bg-primary-50 hover:bg-primary-100 transition-colors"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-neutral-900">{item.benefit.name}</h3>
-                      </div>
-                      <p className="text-sm text-neutral-600 mb-3">
-                        {item.card.productName} • Renews{' '}
-                        {formatDistanceToNow(item.expiryDate, { addSuffix: true })} on{' '}
-                        {format(item.expiryDate, 'MMM d, yyyy')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-primary-700">
-                        ${item.valueAtRisk.toFixed(0)}{item.cycleLabel}
-                      </p>
-                      <p className="text-xs text-neutral-600">available</p>
-                    </div>
+                  <div className="text-center mb-2">
+                    <p className="text-base font-bold text-primary-700">
+                      ${item.valueAtRisk.toFixed(0)}
+                    </p>
+                    <p className="text-xs text-neutral-600">{item.cycleLabel}</p>
                   </div>
-
-                  <div className="pt-3 border-t border-primary-200">
-                    <p className="text-sm font-medium text-neutral-900 mb-1">Quick Action:</p>
-                    <p className="text-sm text-neutral-700">{item.benefit.triggerDescription}</p>
-                  </div>
-
-                  <Link
-                    href={`/benefit/${item.benefit.id}`}
-                    className="mt-3 inline-block px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
-                  >
-                    Log Usage →
-                  </Link>
-                </div>
+                  <h3 className="text-sm font-semibold text-neutral-900 mb-1 line-clamp-2">
+                    {item.benefit.name}
+                  </h3>
+                  <p className="text-xs text-neutral-600 mb-1">{item.card.productName}</p>
+                  <p className="text-xs text-neutral-500">
+                    Renews {formatDistanceToNow(item.expiryDate, { addSuffix: true })}
+                  </p>
+                </Link>
               )
             })}
           </div>
@@ -232,68 +216,36 @@ export default function ActionCenterPage() {
         </div>
 
         {activeWelcomeBonuses.length > 0 ? (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {activeWelcomeBonuses.map((item) => (
-              <div key={item.welcomeBonus.id} className="card border-warning-300">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-neutral-900 mb-1">
-                      {item.card.productName}
-                    </h3>
-                    <p className="text-sm text-neutral-600">
-                      Earn {item.welcomeBonus.expectedPoints.toLocaleString()}{' '}
-                      {item.welcomeBonus.program} points
-                    </p>
-                  </div>
-                  <span className="badge-warning">{item.daysLeft} days left</span>
+              <Link
+                key={item.welcomeBonus.id}
+                href={`/cards/${item.card.id}`}
+                className="card border-warning-300 hover:bg-warning-50 transition-colors"
+              >
+                <h3 className="text-sm font-semibold text-neutral-900 mb-1 line-clamp-1">
+                  {item.card.productName}
+                </h3>
+                <p className="text-xs text-neutral-600 mb-2">
+                  {item.welcomeBonus.expectedPoints.toLocaleString()} {item.welcomeBonus.program} pts
+                </p>
+
+                <div className="w-full bg-neutral-200 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-warning-600 h-2 rounded-full"
+                    style={{ width: `${Math.min(100, item.progress)}%` }}
+                  />
                 </div>
 
-                <div className="mb-4">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-neutral-600">Progress</span>
-                    <span className="font-medium text-neutral-900">
-                      ${item.welcomeBonus.currentSpend.toLocaleString()} / $
-                      {item.welcomeBonus.requiredSpend.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="w-full bg-neutral-200 rounded-full h-3">
-                    <div
-                      className="bg-primary-600 h-3 rounded-full transition-all"
-                      style={{ width: `${Math.min(100, item.progress)}%` }}
-                    />
-                  </div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-neutral-600">{item.progress.toFixed(0)}%</span>
+                  <span className="text-neutral-900 font-medium">{item.daysLeft}d left</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-neutral-200">
-                  <div>
-                    <p className="text-sm text-neutral-600 mb-1">Remaining spend</p>
-                    <p className="font-semibold text-neutral-900">
-                      ${item.remaining.toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral-600 mb-1">Suggested pace</p>
-                    <p className="font-semibold text-neutral-900">
-                      ${Math.ceil(item.requiredWeekly).toLocaleString()}/week
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 p-3 bg-primary-50 rounded-lg border border-primary-200">
-                  <p className="text-sm text-primary-900">
-                    <strong>Action:</strong> Spend approximately $
-                    {Math.ceil(item.requiredDaily).toLocaleString()}/day on this card to meet the
-                    bonus requirement by {format(new Date(item.welcomeBonus.spendWindowEnd), 'MMM d')}.
-                  </p>
-                </div>
-
-                <Link
-                  href={`/cards/${item.card.id}`}
-                  className="mt-3 inline-block text-sm text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  View card details →
-                </Link>
-              </div>
+                <p className="text-xs text-neutral-600">
+                  ${Math.ceil(item.requiredWeekly).toLocaleString()}/wk
+                </p>
+              </Link>
             ))}
           </div>
         ) : (
@@ -315,28 +267,20 @@ export default function ActionCenterPage() {
             <span className="badge-neutral">{monthlyCredits.length}</span>
           </div>
 
-          <div className="card bg-primary-50 border-primary-200">
-            <p className="text-sm text-primary-900 mb-3">
-              <strong>Reminder:</strong> These credits reset on the 1st of each month. Make sure to
-              use them before they expire.
-            </p>
-
-            <div className="space-y-2">
-              {monthlyCredits.map((item: any) => (
-                <div
-                  key={`${item.card.id}-${item.benefit.id}`}
-                  className="flex items-center justify-between py-2 border-b border-primary-200 last:border-0"
-                >
-                  <div>
-                    <p className="font-medium text-primary-900">{item.benefit.name}</p>
-                    <p className="text-sm text-primary-700">{item.card.productName}</p>
-                  </div>
-                  <p className="font-semibold text-primary-900">
-                    ${item.benefit.usageLimitPerCycle?.toFixed(0)}/mo
-                  </p>
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {monthlyCredits.map((item: any) => (
+              <div
+                key={`${item.card.id}-${item.benefit.id}`}
+                className="card bg-primary-50 border-primary-200 text-center"
+              >
+                <p className="text-base font-bold text-primary-900">
+                  ${item.benefit.usageLimitPerCycle?.toFixed(0)}
+                </p>
+                <p className="text-xs text-neutral-600 mb-1">/month</p>
+                <p className="text-sm font-medium text-primary-900 line-clamp-2">{item.benefit.name}</p>
+                <p className="text-xs text-primary-700">{item.card.productName}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
