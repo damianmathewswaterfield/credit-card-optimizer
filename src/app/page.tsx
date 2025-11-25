@@ -124,43 +124,25 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary-50">
-              <CreditCard className="w-5 h-5 text-primary-600" />
-            </div>
-            <div>
-              <p className="text-sm text-neutral-600">Active Cards</p>
-              <p className="text-2xl font-bold text-neutral-900">{cards.length}</p>
-            </div>
-          </div>
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+        <div className="card text-center">
+          <CreditCard className="w-4 h-4 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs text-neutral-600">Cards</p>
+          <p className="text-lg font-bold text-neutral-900">{cards.length}</p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary-50">
-              <TrendingUp className="w-5 h-5 text-primary-600" />
-            </div>
-            <div>
-              <p className="text-sm text-neutral-600">Ready to Use</p>
-              <p className="text-2xl font-bold text-neutral-900">
-                {expiringBenefits.filter((eb) => eb.daysUntilExpiry <= 30).length}
-              </p>
-            </div>
-          </div>
+        <div className="card text-center">
+          <TrendingUp className="w-4 h-4 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs text-neutral-600">Ready</p>
+          <p className="text-lg font-bold text-neutral-900">
+            {expiringBenefits.filter((eb) => eb.daysUntilExpiry <= 30).length}
+          </p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary-50">
-              <Calendar className="w-5 h-5 text-primary-600" />
-            </div>
-            <div>
-              <p className="text-sm text-neutral-600">Opportunities</p>
-              <p className="text-2xl font-bold text-neutral-900">{upcomingDeadlines}</p>
-            </div>
-          </div>
+        <div className="card text-center">
+          <Calendar className="w-4 h-4 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs text-neutral-600">Actions</p>
+          <p className="text-lg font-bold text-neutral-900">{upcomingDeadlines}</p>
         </div>
       </div>
 
@@ -304,23 +286,35 @@ export default function DashboardPage() {
       })()}
 
       {/* Quick links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
         <Link href="/cards" className="card-hover text-center">
-          <CreditCard className="w-8 h-8 text-primary-600 mx-auto mb-3" />
-          <h3 className="font-semibold text-neutral-900 mb-1">View All Cards</h3>
-          <p className="text-sm text-neutral-600">Manage your {cards.length} credit cards</p>
+          <CreditCard className="w-5 h-5 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs font-medium text-neutral-900">Cards</p>
         </Link>
 
         <Link href="/calendar" className="card-hover text-center">
-          <Calendar className="w-8 h-8 text-primary-600 mx-auto mb-3" />
-          <h3 className="font-semibold text-neutral-900 mb-1">Calendar View</h3>
-          <p className="text-sm text-neutral-600">See all upcoming resets and deadlines</p>
+          <Calendar className="w-5 h-5 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs font-medium text-neutral-900">Calendar</p>
         </Link>
 
         <Link href="/action-center" className="card-hover text-center">
-          <AlertCircle className="w-8 h-8 text-primary-600 mx-auto mb-3" />
-          <h3 className="font-semibold text-neutral-900 mb-1">Action Center</h3>
-          <p className="text-sm text-neutral-600">View detailed recommendations</p>
+          <AlertCircle className="w-5 h-5 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs font-medium text-neutral-900">Actions</p>
+        </Link>
+
+        <Link href="/value" className="card-hover text-center">
+          <TrendingUp className="w-5 h-5 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs font-medium text-neutral-900">Value</p>
+        </Link>
+
+        <Link href="/usage-history" className="card-hover text-center">
+          <Activity className="w-5 h-5 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs font-medium text-neutral-900">History</p>
+        </Link>
+
+        <Link href="/settings" className="card-hover text-center">
+          <CreditCard className="w-5 h-5 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs font-medium text-neutral-900">Settings</p>
         </Link>
       </div>
     </div>

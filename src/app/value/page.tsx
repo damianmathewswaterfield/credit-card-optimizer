@@ -105,51 +105,35 @@ export default function ValuePage() {
       </div>
 
       {/* Portfolio Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-primary-100">
-              <TrendingUp className="w-5 h-5 text-primary-600" />
-            </div>
-            <span className="text-sm text-neutral-600">Total Value Extracted</span>
-          </div>
-          <p className="text-2xl font-bold text-neutral-900">
-            ${totalValueExtracted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="card text-center">
+          <TrendingUp className="w-4 h-4 text-primary-600 mx-auto mb-1" />
+          <p className="text-xs text-neutral-600">Value</p>
+          <p className="text-base font-bold text-neutral-900">
+            ${totalValueExtracted.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-neutral-100">
-              <CreditCard className="w-5 h-5 text-neutral-600" />
-            </div>
-            <span className="text-sm text-neutral-600">Annual Fees</span>
-          </div>
-          <p className="text-2xl font-bold text-neutral-900">
-            ${totalAnnualFees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        <div className="card text-center">
+          <CreditCard className="w-4 h-4 text-neutral-600 mx-auto mb-1" />
+          <p className="text-xs text-neutral-600">Fees</p>
+          <p className="text-base font-bold text-neutral-900">
+            ${totalAnnualFees.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className={`p-2 rounded-lg ${totalNetValue >= 0 ? 'bg-success-100' : 'bg-danger-100'}`}>
-              <DollarSign className={`w-5 h-5 ${totalNetValue >= 0 ? 'text-success-600' : 'text-danger-600'}`} />
-            </div>
-            <span className="text-sm text-neutral-600">Net Value</span>
-          </div>
-          <p className={`text-2xl font-bold ${totalNetValue >= 0 ? 'text-success-700' : 'text-danger-700'}`}>
-            ${totalNetValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        <div className="card text-center">
+          <DollarSign className={`w-4 h-4 ${totalNetValue >= 0 ? 'text-success-600' : 'text-danger-600'} mx-auto mb-1`} />
+          <p className="text-xs text-neutral-600">Net</p>
+          <p className={`text-base font-bold ${totalNetValue >= 0 ? 'text-success-700' : 'text-danger-700'}`}>
+            ${totalNetValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className={`p-2 rounded-lg ${portfolioROI >= 100 ? 'bg-success-100' : portfolioROI >= 50 ? 'bg-warning-100' : 'bg-danger-100'}`}>
-              <Award className={`w-5 h-5 ${portfolioROI >= 100 ? 'text-success-600' : portfolioROI >= 50 ? 'text-warning-600' : 'text-danger-600'}`} />
-            </div>
-            <span className="text-sm text-neutral-600">Portfolio ROI</span>
-          </div>
-          <p className={`text-2xl font-bold ${getROIColor(portfolioROI)}`}>
+        <div className="card text-center">
+          <Award className={`w-4 h-4 ${portfolioROI >= 100 ? 'text-success-600' : portfolioROI >= 50 ? 'text-warning-600' : 'text-danger-600'} mx-auto mb-1`} />
+          <p className="text-xs text-neutral-600">ROI</p>
+          <p className={`text-base font-bold ${getROIColor(portfolioROI)}`}>
             {portfolioROI.toFixed(0)}%
           </p>
         </div>
