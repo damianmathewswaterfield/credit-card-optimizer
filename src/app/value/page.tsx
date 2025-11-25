@@ -179,103 +179,29 @@ export default function ValuePage() {
       {/* Card Value Breakdown */}
       <div>
         <h2 className="text-xl font-semibold text-neutral-900 mb-2">Card Breakdown</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {sortedCards.map((cardValue) => (
-          <div key={cardValue.cardId} className={`card border ${getROIBgColor(cardValue.roi)}`}>
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-1">
-                  {cardValue.cardName}
-                </h3>
-                <p className="text-sm text-neutral-600">
-                  Annual Fee: ${cardValue.annualFee.toFixed(0)}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-neutral-900">
-                  ${cardValue.totalValueExtracted.toFixed(2)}
-                </p>
-                <p className={`text-sm font-medium ${getROIColor(cardValue.roi)}`}>
-                  {cardValue.roi.toFixed(0)}% ROI
-                </p>
-              </div>
+          <div key={cardValue.cardId} className={`card border ${getROIBgColor(cardValue.roi)} text-center`}>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-1 line-clamp-1">
+              {cardValue.cardName}
+            </h3>
+            <p className="text-xs text-neutral-600 mb-2">
+              Fee: ${cardValue.annualFee.toFixed(0)}
+            </p>
+
+            <p className="text-xl font-bold text-neutral-900 mb-1">
+              ${cardValue.totalValueExtracted.toFixed(0)}
+            </p>
+            <p className={`text-xs font-medium mb-2 ${getROIColor(cardValue.roi)}`}>
+              {cardValue.roi.toFixed(0)}% ROI
+            </p>
+
+            <div className="pt-2 border-t border-neutral-200">
+              <p className="text-xs text-neutral-600">Net Value</p>
+              <p className={`text-sm font-bold ${cardValue.netValue >= 0 ? 'text-success-700' : 'text-danger-700'}`}>
+                ${cardValue.netValue.toFixed(0)}
+              </p>
             </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-neutral-200">
-              <div>
-                <p className="text-xs text-neutral-600 mb-1">Value Extracted</p>
-                <p className="font-semibold text-neutral-900">
-                  ${cardValue.totalValueExtracted.toFixed(2)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-neutral-600 mb-1">Net Value</p>
-                <p className={`font-semibold ${cardValue.netValue >= 0 ? 'text-success-700' : 'text-danger-700'}`}>
-                  ${cardValue.netValue.toFixed(2)}
-                </p>
-              </div>
-            </div>
-
-            {/* Expandable Benefit Breakdown */}
-            <button
-              onClick={() => setExpandedCard(expandedCard === cardValue.cardId ? null : cardValue.cardId)}
-              className="w-full flex items-center justify-between text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
-            >
-              <span>View Benefit Breakdown</span>
-              {expandedCard === cardValue.cardId ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-            </button>
-
-            {expandedCard === cardValue.cardId && (
-              <div className="mt-4 space-y-3">
-                {/* Value by Category */}
-                <div>
-                  <h4 className="text-sm font-semibold text-neutral-900 mb-2">Value by Category</h4>
-                  <div className="space-y-2">
-                    {Object.entries(cardValue.valueByCategory)
-                      .filter(([_, value]) => value > 0)
-                      .sort(([_, a], [__, b]) => b - a)
-                      .map(([category, value]) => (
-                        <div key={category} className="flex items-center justify-between text-sm">
-                          <span className="text-neutral-700">{category}</span>
-                          <span className="font-medium text-neutral-900">${value.toFixed(2)}</span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-
-                {/* Top Benefits */}
-                <div>
-                  <h4 className="text-sm font-semibold text-neutral-900 mb-2">Top Benefits</h4>
-                  <div className="space-y-2">
-                    {cardValue.benefitValues
-                      .filter((bv) => bv.valueExtracted > 0)
-                      .sort((a, b) => b.valueExtracted - a.valueExtracted)
-                      .slice(0, 5)
-                      .map((benefit) => (
-                        <div key={benefit.benefitId} className="flex items-center justify-between text-sm p-2 bg-white rounded border border-neutral-200">
-                          <div className="flex-1">
-                            <p className="font-medium text-neutral-900">{benefit.benefitName}</p>
-                            <p className="text-xs text-neutral-600">
-                              {benefit.utilizationRate.toFixed(0)}% utilized
-                            </p>
-                          </div>
-                          <span className="font-semibold text-neutral-900">
-                            ${benefit.valueExtracted.toFixed(2)}
-                          </span>
-                        </div>
-                      ))}
-                    {cardValue.benefitValues.filter((bv) => bv.valueExtracted > 0).length === 0 && (
-                      <p className="text-sm text-neutral-600 italic">Start logging usage to track value</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         ))}
         </div>
