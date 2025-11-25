@@ -201,7 +201,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
       {recurringCredits.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-xl font-semibold text-neutral-900">Recurring Credits</h2>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {recurringCredits.map((benefit: any) => {
               const cycleDates = getCycleDates(benefit.cycleType)
               return (
@@ -223,7 +223,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
       {multipliers.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-xl font-semibold text-neutral-900">Earning Multipliers</h2>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {multipliers.map((benefit: any) => {
               const cycleDates = getCycleDates(benefit.cycleType)
               return (
@@ -245,7 +245,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
       {otherBenefits.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-xl font-semibold text-neutral-900">Other Benefits</h2>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {otherBenefits.map((benefit: any) => {
               const cycleDates = getCycleDates(benefit.cycleType)
               return (
